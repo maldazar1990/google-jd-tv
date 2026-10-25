@@ -63,3 +63,23 @@ Chaque tâche exécutée par Jules dans sa VM Google Cloud doit être validée p
   2. **D-Pad Focus Integrity** : Vérifier que chaque vue interactive possède un `nextFocusDown`, `nextFocusUp`, etc. cohérent et ne bloque jamais la télécommande.
   3. **Lecteur d'écran** : Valider la présence de `contentDescription` explicites pour l'accessibilité TalkBack.
   4. **Zéro fuite mémoire** : Vérifier l'absence de références statiques vers le `Context` ou des Bitmaps non recyclés.
+
+---
+
+## 4. Protocole de Développement Multi-Agents (Branches & Intégration)
+
+Pour tout agent travaillant sur le dépôt :
+
+1. **Isolation par branche de fonctionnalité (Feature Branching)** :
+   - Chaque sous-agent de développement **DOIT** créer et travailler sur sa propre branche dédiée (ex: `feature/dpad-focus`, `feature/bing-wallpaper`, `feature/widgets-status`, `feature/accessibility`).
+   - Interdiction formelle de commiter directement sur la branche `main`.
+
+2. **Rôle du Sub-Agent Intégrateur ("Integrator / CI Gatekeeper")** :
+   - Seul le sub-agent intégrateur est habilité à merger du code vers `main`.
+   - **Procédure d'intégration obligatoire** :
+     1. Rebase de la branche de fonctionnalité sur `main`.
+     2. Résolution défensive d'éventuels conflits de fusion (XML, Gradle, Manifest).
+     3. Exécution stricte de la validation : `./gradlew testDebugUnitTest`.
+     4. En cas d'échec : rejet immédiat avec rapport d'erreurs transmis à l'agent émetteur.
+     5. En cas de succès : Merge (Fast-Forward ou Merge Commit propre) vers `main`, suivi d'un `git push origin main`.
+
