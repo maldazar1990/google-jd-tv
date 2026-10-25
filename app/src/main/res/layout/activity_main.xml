@@ -31,10 +31,10 @@
         android:layout_height="match_parent"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingStart="48dp"
-        android:paddingTop="36dp"
-        android:paddingEnd="48dp"
-        android:paddingBottom="36dp">
+        android:paddingStart="44dp"
+        android:paddingTop="28dp"
+        android:paddingEnd="44dp"
+        android:paddingBottom="24dp">
 
         <!-- ======================================================== -->
         <!-- TOP HEADER BAR: Clock/Date on Left, Status Pills on Right -->
@@ -199,13 +199,13 @@
         <FrameLayout
             android:id="@+id/widget_news_container"
             android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:layout_above="@id/dock_shelf"
+            android:layout_height="40dp"
+            android:layout_above="@id/layout_app_tiers"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="28dp"
+            android:layout_marginBottom="16dp"
             android:background="@drawable/bg_capsule_pill"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp">
+            android:paddingStart="22dp"
+            android:paddingEnd="22dp">
 
             <TextView
                 android:id="@+id/text_widget_news"
@@ -220,40 +220,87 @@
                 android:maxWidth="820dp"
                 android:singleLine="true"
                 android:textColor="#F0FFFFFF"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 tools:text="Google News : Découverte majeure dans l'exploration spatiale..." />
         </FrameLayout>
 
         <!-- ======================================================== -->
-        <!-- BOTTOM: Apple TV Frosted Glass Dock with Squircle Apps    -->
+        <!-- BOTTOM: 2-Tier Apple TV Layout (Dock + Drawer)             -->
         <!-- ======================================================== -->
-        <FrameLayout
-            android:id="@+id/dock_shelf"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layout_app_tiers"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/bg_tvos_dock"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:paddingStart="18dp"
-            android:paddingTop="18dp"
-            android:paddingEnd="18dp"
-            android:paddingBottom="18dp">
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_apps"
+            <!-- Tier 1: Apple TV Frosted Glass Dock with Favorite Apps -->
+            <FrameLayout
+                android:id="@+id/dock_shelf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/bg_tvos_dock"
                 android:clipChildren="false"
                 android:clipToPadding="false"
-                android:descendantFocusability="afterDescendants"
-                android:focusable="false"
-                android:orientation="horizontal"
-                android:overScrollMode="never"
-                tools:listitem="@layout/item_app_card" />
+                android:paddingStart="14dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="10dp">
 
-        </FrameLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_favorites"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:descendantFocusability="afterDescendants"
+                    android:focusable="false"
+                    android:orientation="horizontal"
+                    android:overScrollMode="never"
+                    tools:listitem="@layout/item_app_card" />
+
+            </FrameLayout>
+
+            <!-- Tier 2: Drawer Header & App Row -->
+            <LinearLayout
+                android:id="@+id/drawer_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/text_drawer_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Autres applications"
+                    android:textColor="#C0FFFFFF"
+                    android:textSize="13sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_drawer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:descendantFocusability="afterDescendants"
+                    android:focusable="false"
+                    android:orientation="horizontal"
+                    android:overScrollMode="never"
+                    tools:listitem="@layout/item_app_card" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <!-- Loader -->
         <ProgressBar

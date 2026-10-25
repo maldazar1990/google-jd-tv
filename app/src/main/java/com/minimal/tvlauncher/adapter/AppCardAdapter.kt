@@ -2,6 +2,7 @@ package com.minimal.tvlauncher.adapter
 
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.SoundEffectConstants
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -17,13 +18,16 @@ import com.minimal.tvlauncher.model.AppModel
 
 /**
  * High-performance, zero-stutter RecyclerView Adapter for Android TV.
- * Delivers tvOS Apple TV fluid focus scaling (1.08x) and elevation glow at 60 fps.
+ * Delivers tvOS Apple TV fluid focus scaling (1.08x) and elevation glow at 60 fps,
+ * along with native D-Pad audio feedback and bidirectional vertical navigation.
  */
 class AppCardAdapter(
     private val preferencesManager: IPreferencesManager,
     private val onAppClick: (AppModel) -> Unit,
     private val onAppLongClick: (AppModel, View) -> Unit,
-    private val onAppFocus: ((AppModel, Boolean) -> Unit)? = null
+    private val onAppFocus: ((AppModel, Boolean) -> Unit)? = null,
+    private val nextFocusDownId: Int = View.NO_ID,
+    private val nextFocusUpId: Int = View.NO_ID
 ) : RecyclerView.Adapter<AppCardAdapter.AppViewHolder>() {
 
     private val apps = mutableListOf<AppModel>()
@@ -60,7 +64,7 @@ class AppCardAdapter(
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
         val app = apps[position]
-        holder.bind(app, preferencesManager, onAppClick, onAppLongClick, onAppFocus)
+        holder.bind(app, preferencesManager, onAppClick, onAppLongClick, onAppFocus, nextFocusDownId, nextFocusUpId)
     }
 
     class AppViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -77,10 +81,20 @@ class AppCardAdapter(
             prefs: IPreferencesManager,
             onClick: (AppModel) -> Unit,
             onLongClick: (AppModel, View) -> Unit,
-            onFocus: ((AppModel, Boolean) -> Unit)?
+            onFocus: ((AppModel, Boolean) -> Unit)?,
+            focusDownId: Int = View.NO_ID,
+            focusUpId: Int = View.NO_ID
         ) {
             textAppTitle.text = app.label
             cardRoot.contentDescription = app.label
+
+            // Explicit vertical D-Pad focus chaining between Dock and Drawer
+            if (focusDownId != View.NO_ID) {
+                cardRoot.nextFocusDownId = focusDownId
+            }
+            if (focusUpId != View.NO_ID) {
+                cardRoot.nextFocusUpId = focusUpId
+            }
 
             // Banner or Icon handling with fallback
             if (app.banner != null) {
@@ -89,11 +103,11 @@ class AppCardAdapter(
                 imgAppIcon.scaleType = ImageView.ScaleType.CENTER_CROP
             } else if (app.icon != null) {
                 imgAppIcon.setImageDrawable(app.icon)
-                imgAppIcon.setPadding(16, 16, 16, 16)
+                imgAppIcon.setPadding(8, 8, 8, 8)
                 imgAppIcon.scaleType = ImageView.ScaleType.FIT_CENTER
             } else {
                 imgAppIcon.setImageResource(R.drawable.ic_app_placeholder)
-                imgAppIcon.setPadding(16, 16, 16, 16)
+                imgAppIcon.setPadding(8, 8, 8, 8)
                 imgAppIcon.scaleType = ImageView.ScaleType.FIT_CENTER
             }
 
@@ -102,9 +116,9 @@ class AppCardAdapter(
 
             // Apply customizable icon shape (Squircle, Circle, Rounded Rectangle)
             val cornerRadiusDp = when (prefs.getIconShape()) {
-                PreferencesManager.SHAPE_CIRCLE -> 58f
-                PreferencesManager.SHAPE_ROUNDED_RECT -> 12f
-                else -> 24f // Squircle default
+                PreferencesManager.SHAPE_CIRCLE -> 47f
+                PreferencesManager.SHAPE_ROUNDED_RECT -> 10f
+                else -> 18f // Widescreen squircle default
             }
             val density = itemView.resources.displayMetrics.density
             cardView.radius = cornerRadiusDp * density
@@ -121,12 +135,15 @@ class AppCardAdapter(
                 textAppTitle.setTextColor(Color.parseColor("#F5F7FA"))
             }
 
-            // D-Pad Focus Behavior (Apple TV fluid animation at 60 fps)
-            cardRoot.setOnFocusChangeListener { _, hasFocus ->
+            // D-Pad Focus Behavior (Apple TV fluid animation at 60 fps + Audio Feedback)
+            cardRoot.setOnFocusChangeListener { v, hasFocus ->
                 if (hasFocus) {
+                    if (prefs.isAudioFeedbackEnabled()) {
+                        v.playSoundEffect(SoundEffectConstants.NAVIGATION_RIGHT)
+                    }
                     cardContainer.animate()
-                        .scaleX(1.10f)
-                        .scaleY(1.10f)
+                        .scaleX(1.08f)
+                        .scaleY(1.08f)
                         .translationZ(10f * density)
                         .setDuration(120)
                         .start()
@@ -145,7 +162,10 @@ class AppCardAdapter(
                 onFocus?.invoke(app, hasFocus)
             }
 
-            cardRoot.setOnClickListener {
+            cardRoot.setOnClickListener { v ->
+                if (prefs.isAudioFeedbackEnabled()) {
+                    v.playSoundEffect(SoundEffectConstants.CLICK)
+                }
                 onClick(app)
             }
 

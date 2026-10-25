@@ -45,7 +45,10 @@ class MainActivity : FragmentActivity() {
     private lateinit var mainRoot: FrameLayout
     private lateinit var imageWallpaper: ImageView
     private lateinit var viewScrim: View
-    private lateinit var recyclerApps: RecyclerView
+    private lateinit var recyclerFavorites: RecyclerView
+    private lateinit var recyclerDrawer: RecyclerView
+    private lateinit var drawerContainer: LinearLayout
+    private lateinit var textDrawerTitle: TextView
     private lateinit var progressLoader: ProgressBar
     private lateinit var btnSettings: FrameLayout
 
@@ -63,7 +66,8 @@ class MainActivity : FragmentActivity() {
     private lateinit var widgetNewsContainer: FrameLayout
     private lateinit var textWidgetNews: TextView
 
-    private lateinit var adapter: AppCardAdapter
+    private lateinit var favoritesAdapter: AppCardAdapter
+    private lateinit var drawerAdapter: AppCardAdapter
     private val backgroundExecutor = Executors.newFixedThreadPool(2)
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -86,7 +90,7 @@ class MainActivity : FragmentActivity() {
 
         ensureDefaultWidgetPreferences()
         initViews()
-        setupRecyclerView()
+        setupRecyclerViews()
         setupListeners()
         registerPackageReceiver()
     }
@@ -126,7 +130,10 @@ class MainActivity : FragmentActivity() {
         mainRoot = findViewById(R.id.main_root)
         imageWallpaper = findViewById(R.id.image_wallpaper)
         viewScrim = findViewById(R.id.view_scrim)
-        recyclerApps = findViewById(R.id.recycler_apps)
+        recyclerFavorites = findViewById(R.id.recycler_favorites)
+        recyclerDrawer = findViewById(R.id.recycler_drawer)
+        drawerContainer = findViewById(R.id.drawer_container)
+        textDrawerTitle = findViewById(R.id.text_drawer_title)
         progressLoader = findViewById(R.id.progress_loader)
         btnSettings = findViewById(R.id.btn_settings)
 
@@ -146,12 +153,12 @@ class MainActivity : FragmentActivity() {
         textWidgetNews.isSelected = true
     }
 
-    private fun setupRecyclerView() {
-        // Apple TV signature horizontal dock
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        recyclerApps.layoutManager = layoutManager
+    private fun setupRecyclerViews() {
+        // Apple TV signature 2-tier structure: Dock (Favorites) on top, Drawer below
+        recyclerFavorites.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerDrawer.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        adapter = AppCardAdapter(
+        favoritesAdapter = AppCardAdapter(
             preferencesManager = preferencesManager,
             onAppClick = { app ->
                 discoveryManager.launchApp(app)
@@ -159,11 +166,21 @@ class MainActivity : FragmentActivity() {
             onAppLongClick = { app, _ ->
                 showAppContextMenu(app)
             },
-            onAppFocus = { app, hasFocus ->
-                // Optional subtitle feedback
-            }
+            nextFocusDownId = R.id.recycler_drawer
         )
-        recyclerApps.adapter = adapter
+        recyclerFavorites.adapter = favoritesAdapter
+
+        drawerAdapter = AppCardAdapter(
+            preferencesManager = preferencesManager,
+            onAppClick = { app ->
+                discoveryManager.launchApp(app)
+            },
+            onAppLongClick = { app, _ ->
+                showAppContextMenu(app)
+            },
+            nextFocusUpId = R.id.recycler_favorites
+        )
+        recyclerDrawer.adapter = drawerAdapter
     }
 
     private fun setupListeners() {
@@ -190,17 +207,32 @@ class MainActivity : FragmentActivity() {
     private fun loadAppsAsync() {
         progressLoader.visibility = View.VISIBLE
         backgroundExecutor.execute {
-            val apps = discoveryManager.loadInstalledApps(includeHidden = false)
+            val allApps = discoveryManager.loadInstalledApps(includeHidden = false)
+            val favoritePackageNames = preferencesManager.getFavorites()
+
+            val favoriteApps: List<AppModel>
+            val drawerApps: List<AppModel>
+
+            if (favoritePackageNames.isNotEmpty()) {
+                favoriteApps = allApps.filter { favoritePackageNames.contains(it.packageName) }
+                drawerApps = allApps.filter { !favoritePackageNames.contains(it.packageName) }
+            } else {
+                favoriteApps = allApps.take(6)
+                drawerApps = allApps.drop(6)
+            }
+
             mainHandler.post {
-                adapter.setApps(apps)
+                favoritesAdapter.setApps(favoriteApps)
+                drawerAdapter.setApps(drawerApps)
+                drawerContainer.visibility = if (drawerApps.isNotEmpty()) View.VISIBLE else View.GONE
                 progressLoader.visibility = View.GONE
 
                 // Auto-focus the first app in the dock on launch
-                if (recyclerApps.childCount > 0) {
-                    recyclerApps.getChildAt(0)?.requestFocus()
+                if (recyclerFavorites.childCount > 0) {
+                    recyclerFavorites.getChildAt(0)?.requestFocus()
                 } else {
-                    recyclerApps.post {
-                        recyclerApps.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                    recyclerFavorites.post {
+                        recyclerFavorites.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
                     }
                 }
             }
@@ -272,7 +304,6 @@ class MainActivity : FragmentActivity() {
 
         if (bingEnabled) {
             backgroundExecutor.execute {
-                // Check if we have cached wallpaper or need to fetch
                 var bitmap = wallpaperManager.getCachedWallpaperBitmap()
                 if (bitmap == null) {
                     val downloaded = wallpaperManager.refreshWallpaperFromBing()
@@ -389,7 +420,8 @@ class MainActivity : FragmentActivity() {
                     5 -> {
                         preferencesManager.setHighContrast(!preferencesManager.isHighContrast())
                         applyThemeAndPreferences()
-                        adapter.notifyDataSetChanged()
+                        favoritesAdapter.notifyDataSetChanged()
+                        drawerAdapter.notifyDataSetChanged()
                     }
                     6 -> {
                         cycleIconShapes()
@@ -411,7 +443,8 @@ class MainActivity : FragmentActivity() {
             else -> PreferencesManager.SHAPE_SQUIRCLE
         }
         preferencesManager.setIconShape(next)
-        adapter.notifyDataSetChanged()
+        favoritesAdapter.notifyDataSetChanged()
+        drawerAdapter.notifyDataSetChanged()
     }
 
     private fun openAppDetails(packageName: String) {
