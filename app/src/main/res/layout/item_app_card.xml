@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Conteneur Carte Icône -->
+    <FrameLayout
+        android:id="@+id/card_container"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardBackgroundColor="@color/card_bg_default"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            app:cardMaxElevation="8dp">
+
+            <ImageView
+                android:id="@+id/img_app_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:padding="18dp"
+                android:scaleType="fitCenter"
+                tools:src="@drawable/ic_app_placeholder" />
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Bordure de Focus (Glow Apple TV / High Contrast) -->
+        <View
+            android:id="@+id/view_focus_border"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/focus_border_normal"
+            android:visibility="invisible" />
+
+        <!-- Badge Étoile Favori -->
+        <ImageView
+            android:id="@+id/badge_favorite"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:src="@android:drawable/btn_star_big_on"
+            android:visibility="gone"
+            app:tint="@color/focus_border_high_contrast" />
+    </FrameLayout>
+
+    <!-- Titre de l'application -->
+    <TextView
+        android:id="@+id/text_app_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:lines="1"
+        android:textColor="@color/text_primary"
+        android:textSize="13sp"
+        android:fontFamily="sans-serif-medium"
+        tools:text="Netflix" />
+
+</LinearLayout>

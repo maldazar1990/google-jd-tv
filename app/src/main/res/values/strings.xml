@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Zen TV</string>
+    <string name="section_favorites">Favoris</string>
+    <string name="section_all_apps">Toutes les applications</string>
+    <string name="no_apps_found">Aucune application trouvée</string>
+    <string name="settings_title">Réglages du Launcher</string>
+
+    <!-- Options Accessibilité -->
+    <string name="pref_accessibility_title">Accessibilité</string>
+    <string name="pref_high_contrast">Mode Contraste Élevé (Fond noir pur + bordure jaune vif)</string>
+    <string name="pref_large_text">Grandes polices de caractères</string>
+    <string name="pref_grid_size">Disposition de la grille</string>
+    <string name="grid_standard">Standard (6 colonnes)</string>
+    <string name="grid_large">Grande (4 colonnes - Haute visibilité)</string>
+    <string name="grid_extra_large">Très grande (3 colonnes - Malvoyants)</string>
+
+    <!-- Options Icônes -->
+    <string name="pref_icons_title">Style des Icônes</string>
+    <string name="shape_squircle">Squircle arrondi (Style Apple TV)</string>
+    <string name="shape_circle">Cercle complet</string>
+    <string name="shape_rounded_rect">Carré aux coins doux</string>
+
+    <!-- Menu contextuel -->
+    <string name="action_open">Ouvrir l\'application</string>
+    <string name="action_favorite_add">Ajouter aux favoris</string>
+    <string name="action_favorite_remove">Retirer des favoris</string>
+    <string name="action_hide">Masquer l\'application</string>
+    <string name="action_app_info">Informations système</string>
+</resources>

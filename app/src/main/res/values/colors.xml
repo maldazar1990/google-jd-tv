@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Palette Apple TV (tvOS) -->
+    <color name="bg_dark_top">#14161C</color>
+    <color name="bg_dark_bottom">#08090C</color>
+    <color name="bg_pure_black">#000000</color>
+
+    <color name="card_bg_default">#262A34</color>
+    <color name="card_stroke_default">#1F232B</color>
+
+    <!-- Focus styles -->
+    <color name="focus_glow_apple">#FFFFFF</color>
+    <color name="focus_border_apple">#F0F3F8</color>
+    <color name="focus_border_high_contrast">#FFD600</color> <!-- Jaune vif accessibilité -->
+
+    <!-- Text colors -->
+    <color name="text_primary">#F5F5F7</color>
+    <color name="text_secondary">#86868B</color>
+    <color name="text_high_contrast">#FFFFFF</color>
+
+    <!-- Badges / Accents -->
+    <color name="accent_blue">#0A84FF</color>
+    <color name="accent_pill">#33FFFFFF</color>
+</resources>
