@@ -74,7 +74,13 @@ Pour tout agent travaillant sur le dépôt :
    - Chaque sous-agent de développement **DOIT** créer et travailler sur sa propre branche dédiée (ex: `feature/dpad-focus`, `feature/bing-wallpaper`, `feature/widgets-status`, `feature/accessibility`).
    - Interdiction formelle de commiter directement sur la branche `main`.
 
-2. **Rôle du Sub-Agent Intégrateur ("Integrator / CI Gatekeeper")** :
+2. **Phase Pré-PR obligatoire (Économie de charge & Détection amont)** :
+   - Avant même de soumettre une Pull Request ou demander un merge :
+     1. L'agent développeur rédige et valide localement ses tests unitaires.
+     2. L'agent développeur délègue à un **sous-agent de test dédié (QA Tester Sub-Agent)** pour exécuter une passe défensive autonome (cas limites, stress test, vérification mémoire).
+     3. La PR n'est émise que si le sous-agent QA donne son feu vert, évitant ainsi les rejets d'intégration et les cycles de reprise inutiles.
+
+3. **Rôle du Sub-Agent Intégrateur ("Integrator / CI Gatekeeper")** :
    - Seul le sub-agent intégrateur est habilité à merger du code vers `main`.
    - **Procédure d'intégration obligatoire** (suivant le skill `.skills/tv-testing/SKILL.md`) :
      1. Rebase de la branche de fonctionnalité sur `main`.
@@ -84,7 +90,8 @@ Pour tout agent travaillant sur le dépôt :
      5. En cas d'échec : rejet immédiat avec rapport d'erreurs transmis à l'agent émetteur.
      6. En cas de succès : Merge vers `main`.
 
-3. **Numérotation des Versions & Tagging Automatisé** :
+4. **Numérotation des Versions & Tagging Automatisé** :
+
    - Dès qu'une version fonctionnelle est prête pour release :
      - Validation 100% en VM isolée.
      - **Test Pré-production sur Google TV physique** obligatoire avant toute version majeure (`vX.0.0`) via `adb -s 192.168.2.100:38667 install -r ...`.

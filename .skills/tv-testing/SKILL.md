@@ -5,11 +5,22 @@ description: Protocole et suite d'audits de validation backend (moteur/données)
 
 # Skill de Test Complet : Backend & Frontend Android TV
 
-Ce skill est exécuté obligatoirement par le sous-agent **Integrator & CI Gatekeeper** avant toute validation et fusion d'une branche vers `main`.
+Ce skill est exécuté obligatoirement :
+1. **Par le sous-agent Développeur & son sous-agent QA dédié AVANT d'ouvrir une PR** (pour détecter les régressions en amont et économiser les cycles d'intégration).
+2. **Par le sous-agent Integrator & CI Gatekeeper** lors de la validation finale avant toute fusion vers `main`.
+
+---
+
+## 0. Étape Pré-PR : Validation Locale par Sous-Agent QA
+- Avant de soumettre une Pull Request :
+  * L'agent développeur teste sa fonctionnalité sur sa branche isolée.
+  * L'agent appelle un **sous-agent QA autonome** pour soumettre le code à une passe d'épreuves (stress tests, cas limites, allocations mémoire).
+  * La PR n'est créée que si ce premier filtre est 100 % vert.
 
 ---
 
 ## 1. Tests Backend (Moteur, Données, Réseau & Performance)
+
 
 ### A. Persistance & Données
 - [ ] **Tests Unitaires Unit/Stress** : Valider `PreferencesManager` et la corruption éventuelle du stockage avec `./gradlew testDebugUnitTest`.
