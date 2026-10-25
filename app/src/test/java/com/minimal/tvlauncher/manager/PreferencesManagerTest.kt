@@ -577,6 +577,21 @@ class PreferencesManagerTest {
     }
 
     @Test
+    fun scenicWallpaper_isAlwaysVisibleAndRecoverable() {
+        assertThat(preferencesManager.isDefaultScenicWallpaperActive()).isTrue()
+        assertThat(preferencesManager.isHighContrast()).isFalse()
+
+        preferencesManager.setHighContrast(true)
+        preferencesManager.setBingWallpaperEnabled(true)
+        assertThat(preferencesManager.isDefaultScenicWallpaperActive()).isFalse()
+
+        preferencesManager.ensureDefaultScenicWallpaper()
+        assertThat(preferencesManager.isDefaultScenicWallpaperActive()).isTrue()
+        assertThat(preferencesManager.isHighContrast()).isFalse()
+        assertThat(preferencesManager.getWallpaperSource()).isEqualTo(PreferencesManager.WALLPAPER_DEFAULT)
+    }
+
+    @Test
     fun weatherPreferences_autoAndManual_persistsCorrectly() {
         preferencesManager.setWeatherAutoLocation(false)
         assertThat(preferencesManager.isWeatherAutoLocation()).isFalse()
