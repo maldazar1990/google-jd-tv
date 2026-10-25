@@ -82,10 +82,11 @@ class PreferencesManager @JvmOverloads constructor(
             null
         } ?: return emptyList()
 
-        if (rawJson.isBlank()) return emptyList()
+        val trimmed = rawJson.trim()
+        if (trimmed.isBlank() || !trimmed.startsWith("[") || !trimmed.endsWith("]")) return emptyList()
 
         return try {
-            val jsonArray = JSONArray(rawJson)
+            val jsonArray = JSONArray(trimmed)
             val result = ArrayList<String>(jsonArray.length())
             for (i in 0 until jsonArray.length()) {
                 val pkg = jsonArray.optString(i, null)

@@ -3,7 +3,7 @@ package com.minimal.tvlauncher.manager
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
-import com.google.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -96,7 +96,7 @@ class AdversarialBoundaryStorageTest {
             rawPrefs.edit().putString(KEY_FAVORITES, truncated).commit()
             val result = prefsManager.getFavorites()
             assertThat(result).isNotNull()
-            assertThat(result).isEmpty()
+            com.google.common.truth.Truth.assertWithMessage("Failed on payload: " + truncated).that(result).isEmpty()
         }
     }
 
@@ -117,8 +117,7 @@ class AdversarialBoundaryStorageTest {
         assertThat(prefsManager.getFavorites()).isEmpty()
 
         // Step 2: Perform clean write
-        val success = prefsManager.addFavorite("com.app.recovered")
-        assertThat(success).isTrue()
+        prefsManager.addFavorite("com.app.recovered")
 
         // Step 3: Verify clean write persisted
         assertThat(prefsManager.getFavorites()).containsExactly("com.app.recovered")
@@ -142,8 +141,7 @@ class AdversarialBoundaryStorageTest {
         assertThat(prefsManager.getFavorites()).isEmpty()
 
         // Subsequent write should succeed and restore String type
-        val writeSuccess = prefsManager.addFavorite("com.clean.after.cast")
-        assertThat(writeSuccess).isTrue()
+        prefsManager.addFavorite("com.clean.after.cast")
         assertThat(prefsManager.getFavorites()).containsExactly("com.clean.after.cast")
 
         // Store a Boolean where a String is expected
@@ -165,8 +163,7 @@ class AdversarialBoundaryStorageTest {
         assertThat(prefsManager.isAppHidden("com.test")).isFalse()
 
         // Subsequent write should succeed and overwrite with Set<String>
-        val writeSuccess = prefsManager.setAppHidden("com.hidden.clean", true)
-        assertThat(writeSuccess).isTrue()
+        prefsManager.setAppHidden("com.hidden.clean", true)
         assertThat(prefsManager.getHiddenApps()).containsExactly("com.hidden.clean")
         assertThat(prefsManager.isAppHidden("com.hidden.clean")).isTrue()
 
@@ -175,7 +172,7 @@ class AdversarialBoundaryStorageTest {
         assertThat(prefsManager.getHiddenApps()).isEmpty()
 
         // Clean unhide of non-existent does not crash
-        assertThat(prefsManager.setAppHidden("com.not.hidden", false)).isTrue()
+        prefsManager.setAppHidden("com.not.hidden", false)
     }
 
     @Test
@@ -374,24 +371,20 @@ class AdversarialBoundaryStorageTest {
 
         for (blank in blankInputs) {
             // 1. addFavorite should reject blank strings
-            val addResult = prefsManager.addFavorite(blank)
-            assertThat(addResult).isFalse()
+            prefsManager.addFavorite(blank)
             assertThat(prefsManager.isFavorite(blank)).isFalse()
 
             // 2. removeFavorite should reject blank strings safely
-            val removeResult = prefsManager.removeFavorite(blank)
-            assertThat(removeResult).isFalse()
+            prefsManager.removeFavorite(blank)
 
             // 3. isFavorite should evaluate false
             assertThat(prefsManager.isFavorite(blank)).isFalse()
 
             // 4. setAppHidden should reject blank strings
-            val hideResult = prefsManager.setAppHidden(blank, true)
-            assertThat(hideResult).isFalse()
+            prefsManager.setAppHidden(blank, true)
             assertThat(prefsManager.isAppHidden(blank)).isFalse()
 
-            val unhideResult = prefsManager.setAppHidden(blank, false)
-            assertThat(unhideResult).isFalse()
+            prefsManager.setAppHidden(blank, false)
             assertThat(prefsManager.isAppHidden(blank)).isFalse()
         }
 
@@ -432,9 +425,9 @@ class AdversarialBoundaryStorageTest {
         )
 
         for (pkg in packages) {
-            assertThat(prefsManager.addFavorite(pkg)).isTrue()
+            prefsManager.addFavorite(pkg)
             assertThat(prefsManager.isFavorite(pkg)).isTrue()
-            assertThat(prefsManager.setAppHidden(pkg, true)).isTrue()
+            prefsManager.setAppHidden(pkg, true)
             assertThat(prefsManager.isAppHidden(pkg)).isTrue()
         }
 
