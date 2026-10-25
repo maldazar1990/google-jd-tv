@@ -25,9 +25,10 @@ class PreferencesManager @JvmOverloads constructor(
 
     private val appContext: Context = context.applicationContext
     private val prefs: SharedPreferences = appContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-    private val lock = Any()
 
     companion object {
+        private val lock = Any()
+
         const val PREFS_NAME = "tv_launcher_prefs"
 
         // SharedPreferences Keys
@@ -38,6 +39,13 @@ class PreferencesManager @JvmOverloads constructor(
         const val PREF_ICON_SHAPE = "pref_icon_shape"
         const val PREF_AUDIO_FEEDBACK = "pref_audio_feedback"
 
+        // Requirement R5: Wallpaper & Modular Status Widgets Keys
+        const val PREF_BING_WALLPAPER = "pref_bing_wallpaper"
+        const val PREF_WIDGET_RAM = "pref_widget_ram"
+        const val PREF_WIDGET_NETWORK = "pref_widget_network"
+        const val PREF_WIDGET_WEATHER = "pref_widget_weather"
+        const val PREF_WIDGET_NEWS = "pref_widget_news"
+
         // Grid Column Bounds & Defaults
         const val DEFAULT_GRID_COLUMNS = 6
         const val MIN_GRID_COLUMNS = 3
@@ -47,6 +55,13 @@ class PreferencesManager @JvmOverloads constructor(
         // Accessibility & Visual Defaults
         const val DEFAULT_HIGH_CONTRAST = false
         const val DEFAULT_AUDIO_FEEDBACK = true
+
+        // Requirement R5 Defaults
+        const val DEFAULT_BING_WALLPAPER = false
+        const val DEFAULT_WIDGET_RAM = false
+        const val DEFAULT_WIDGET_NETWORK = false
+        const val DEFAULT_WIDGET_WEATHER = false
+        const val DEFAULT_WIDGET_NEWS = false
 
         // Icon Shape Constants & Defaults
         const val SHAPE_SQUIRCLE = "squircle"
@@ -258,6 +273,90 @@ class PreferencesManager @JvmOverloads constructor(
 
     fun setAudioFeedbackEnabled(enabled: Boolean, sync: Boolean): Boolean {
         return prefs.edit().putBoolean(PREF_AUDIO_FEEDBACK, enabled).save(sync)
+    }
+
+    // ==========================================
+    // Requirement R5: Wallpaper & Modular Status Widgets
+    // ==========================================
+
+    override fun isBingWallpaperEnabled(): Boolean {
+        return try {
+            prefs.getBoolean(PREF_BING_WALLPAPER, DEFAULT_BING_WALLPAPER)
+        } catch (e: Exception) {
+            DEFAULT_BING_WALLPAPER
+        }
+    }
+
+    override fun setBingWallpaperEnabled(enabled: Boolean) {
+        setBingWallpaperEnabled(enabled, isSyncMode)
+    }
+
+    fun setBingWallpaperEnabled(enabled: Boolean, sync: Boolean): Boolean {
+        return prefs.edit().putBoolean(PREF_BING_WALLPAPER, enabled).save(sync)
+    }
+
+    override fun isRamWidgetEnabled(): Boolean {
+        return try {
+            prefs.getBoolean(PREF_WIDGET_RAM, DEFAULT_WIDGET_RAM)
+        } catch (e: Exception) {
+            DEFAULT_WIDGET_RAM
+        }
+    }
+
+    override fun setRamWidgetEnabled(enabled: Boolean) {
+        setRamWidgetEnabled(enabled, isSyncMode)
+    }
+
+    fun setRamWidgetEnabled(enabled: Boolean, sync: Boolean): Boolean {
+        return prefs.edit().putBoolean(PREF_WIDGET_RAM, enabled).save(sync)
+    }
+
+    override fun isNetworkWidgetEnabled(): Boolean {
+        return try {
+            prefs.getBoolean(PREF_WIDGET_NETWORK, DEFAULT_WIDGET_NETWORK)
+        } catch (e: Exception) {
+            DEFAULT_WIDGET_NETWORK
+        }
+    }
+
+    override fun setNetworkWidgetEnabled(enabled: Boolean) {
+        setNetworkWidgetEnabled(enabled, isSyncMode)
+    }
+
+    fun setNetworkWidgetEnabled(enabled: Boolean, sync: Boolean): Boolean {
+        return prefs.edit().putBoolean(PREF_WIDGET_NETWORK, enabled).save(sync)
+    }
+
+    override fun isWeatherWidgetEnabled(): Boolean {
+        return try {
+            prefs.getBoolean(PREF_WIDGET_WEATHER, DEFAULT_WIDGET_WEATHER)
+        } catch (e: Exception) {
+            DEFAULT_WIDGET_WEATHER
+        }
+    }
+
+    override fun setWeatherWidgetEnabled(enabled: Boolean) {
+        setWeatherWidgetEnabled(enabled, isSyncMode)
+    }
+
+    fun setWeatherWidgetEnabled(enabled: Boolean, sync: Boolean): Boolean {
+        return prefs.edit().putBoolean(PREF_WIDGET_WEATHER, enabled).save(sync)
+    }
+
+    override fun isNewsWidgetEnabled(): Boolean {
+        return try {
+            prefs.getBoolean(PREF_WIDGET_NEWS, DEFAULT_WIDGET_NEWS)
+        } catch (e: Exception) {
+            DEFAULT_WIDGET_NEWS
+        }
+    }
+
+    override fun setNewsWidgetEnabled(enabled: Boolean) {
+        setNewsWidgetEnabled(enabled, isSyncMode)
+    }
+
+    fun setNewsWidgetEnabled(enabled: Boolean, sync: Boolean): Boolean {
+        return prefs.edit().putBoolean(PREF_WIDGET_NEWS, enabled).save(sync)
     }
 
     // ==========================================

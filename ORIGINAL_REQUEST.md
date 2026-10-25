@@ -51,3 +51,59 @@ Please incorporate Requirement R5 into the project architecture and settings:
    - Weather widget
    - Google News RSS headlines ticker
 All widgets must be individually toggleable so the user can keep the screen 100% minimal or enable specific info. Ensure strict zero-memory leaks and background caching.
+
+
+## 2026-10-25T20:11:11Z
+
+Workflow Directive Update:
+Implement Requirement R6 (Multi-Agent Branching & CI Integrator Gatekeeper):
+1. Subagents must create and isolate their implementation work on dedicated feature branches (e.g., `feature/...`).
+2. An Integrator / Gatekeeper subagent handles reviewing the branch, validating `./gradlew testDebugUnitTest`, and safely merging into `main`.
+3. Keep main clean and push validated commits to origin. AGENTS.md has been updated accordingly.
+
+
+## 2026-10-25T20:13:48Z
+
+Pipeline Update:
+The skill `.skills/tv-testing/SKILL.md` is now created and pushed to main:
+1. Prior to merging any feature branch into main, the Integrator subagent must execute both the Backend checks (persistence, leak-free, double app scan, network resiliency) and Frontend checks (D-pad focus integrity, no focus traps, 60fps budget, TalkBack a11y, contrast).
+2. When a version is ready for release, apply semantic versioning:
+   - Increment versionCode and versionName in app/build.gradle.kts
+   - Tag the git commit (vX.Y.Z) and update CHANGELOG.md.
+
+
+## 2026-10-25T20:16:00Z
+
+Pipeline Update:
+Two-Tier Qualification Protocol recorded:
+1. Tier 1: All unit, defensive, and boundary tests execute strictly in the isolated VM environment.
+2. Tier 2: A pre-production test on the physical Google TV (192.168.2.100:38667) is required prior to any major release (vX.0.0). Both AGENTS.md and .skills/tv-testing/SKILL.md have been updated and pushed to main.
+
+
+## 2026-10-25T20:17:08Z
+
+Pre-PR QA Protocol Update:
+Rule added to AGENTS.md and .skills/tv-testing/SKILL.md:
+Before submitting any PR or requesting a merge to main:
+1. Feature agents must test their code locally on their branch.
+2. Feature agents must invoke a dedicated QA subagent to challenge the feature (boundary checks, leak verification, stress test).
+3. Only upon QA subagent approval is the PR submitted to the Integrator Gatekeeper, preventing wasted integration and rebase cycles.
+
+
+## 2026-10-25T20:18:14Z
+
+Final Deliverable Requirement:
+When implementation and testing are complete, a dedicated Documentation subagent must produce a comprehensive `DOCUMENTATION.md` file at the repository root covering:
+1. Technical Architecture (native Views, <30MB RAM constraints, 60fps focus animations).
+2. Remote Control & Navigation User Guide (D-pad gestures, long-press context menus).
+3. Bing Wallpaper & Modular Widgets Configuration.
+4. Accessibility Features (OLED High Contrast, custom grid columns, TalkBack).
+5. Wireless ADB Deployment & Google TV Setup Guide.
+6. Google Jules Maintenance Workflows.
+Updated in AGENTS.md and pushed to main.
+
+
+## 2026-10-25T20:31:50Z
+
+JDK 17 and Gradle 8.5 test runner is 100% operational. `./gradlew.bat testDebugUnitTest` runs with 0 errors and all 40 tests pass.
+Continue your planned milestones according to the multi-agent protocol in AGENTS.md (feature branches -> QA subagent validation -> merge to main -> build APK). Proceed with M2 (App Discovery, Sideload Fallback, and Bing Wallpaper/Widget services) and M3 (UI Grid & D-Pad focus).
