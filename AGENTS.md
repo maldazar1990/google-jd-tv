@@ -86,8 +86,11 @@ Pour tout agent travaillant sur le dépôt :
 
 3. **Numérotation des Versions & Tagging Automatisé** :
    - Dès qu'une version fonctionnelle est prête pour release :
+     - Validation 100% en VM isolée.
+     - **Test Pré-production sur Google TV physique** obligatoire avant toute version majeure (`vX.0.0`) via `adb -s 192.168.2.100:38667 install -r ...`.
      - Incrémenter `versionCode` et `versionName` (SemVer `vX.Y.Z`) dans `app/build.gradle.kts`.
      - Créer un tag Git annoté (`git tag -a vX.Y.Z -m "..."`).
      - Mettre à jour `CHANGELOG.md` et pousser les tags sur `origin`.
+
 
 

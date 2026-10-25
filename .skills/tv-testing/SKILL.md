@@ -38,8 +38,29 @@ Ce skill est exécuté obligatoirement par le sous-agent **Integrator & CI Gatek
 - [ ] **Grilles Modulaires** : Valider le rendu visuel sans chevauchement en 6 colonnes (Standard), 4 colonnes (Grand) et 3 colonnes (Très Grand).
 
 ---
+## 3. Pipeline de Qualification à Deux Niveaux (VM & Pré-production Google TV)
 
-## 3. Règle de Versioning Automatique (Release Tagging)
+Pour garantir une stabilité absolue :
+
+### Niveau 1 : Validation 100% en Machine Virtuelle (VM / CI)
+- Tous les tests unitaires, défensifs et headless (Robolectric) s'exécutent dans la VM Cloud / locale.
+- **Règle absolue** : Aucun code n'est déployé sur du matériel physique tant que 100% des tests dans la VM ne sont pas au vert.
+
+### Niveau 2 : Banc de Test Pré-production sur Google TV Réel (Avant Version Majeure)
+- **Déclenchement** : Obligatoire avant toute version majeure (`vX.0.0`) ou changement architectural critique.
+- **Protocole** :
+  1. Génération de l'APK de staging/préproduction (`./gradlew assembleDebug`).
+  2. Déploiement direct via ADB sans fil sur le Chromecast Google TV 4K cible :
+     ```bash
+     adb -s 192.168.2.100:38667 install -r app/build/outputs/apk/debug/app-debug.apk
+     ```
+  3. Validation matérielle en conditions réelles : télécommande physique (D-pad), réactivité 60 fps sur SoC Amlogic, et lisibilité sur grand écran.
+  4. Approbation humaine requise pour sceller la release majeure.
+
+---
+
+## 4. Règle de Versioning Automatique (Release Tagging)
+
 
 Dès qu'une version est déclarée prête et que l'ensemble des tests Backend & Frontend sont au vert :
 1. **Incrémenter la version** dans `app/build.gradle.kts` :
