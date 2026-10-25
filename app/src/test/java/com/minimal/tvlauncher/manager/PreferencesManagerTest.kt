@@ -26,6 +26,13 @@ class PreferencesManagerTest {
         private const val KEY_HIGH_CONTRAST = "pref_high_contrast"
         private const val KEY_ICON_SHAPE = "pref_icon_shape"
         private const val KEY_AUDIO_FEEDBACK = "pref_audio_feedback"
+
+        // Requirement R5: Wallpaper & Modular Status Widgets Keys
+        private const val KEY_BING_WALLPAPER = "pref_bing_wallpaper"
+        private const val KEY_WIDGET_RAM = "pref_widget_ram"
+        private const val KEY_WIDGET_NETWORK = "pref_widget_network"
+        private const val KEY_WIDGET_WEATHER = "pref_widget_weather"
+        private const val KEY_WIDGET_NEWS = "pref_widget_news"
     }
 
     @Before
@@ -357,4 +364,196 @@ class PreferencesManagerTest {
         assertThat(secondInstance.getIconShape()).isEqualTo("circle")
         assertThat(secondInstance.isAudioFeedbackEnabled()).isFalse()
     }
+
+    // ==========================================
+    // 10. Requirement R5: Default Values (all false)
+    // ==========================================
+
+    @Test
+    fun defaultBingWallpaper_isFalse() {
+        assertThat(preferencesManager.isBingWallpaperEnabled()).isFalse()
+        assertThat(sharedPreferences.contains(KEY_BING_WALLPAPER)).isFalse()
+    }
+
+    @Test
+    fun defaultRamWidget_isFalse() {
+        assertThat(preferencesManager.isRamWidgetEnabled()).isFalse()
+        assertThat(sharedPreferences.contains(KEY_WIDGET_RAM)).isFalse()
+    }
+
+    @Test
+    fun defaultNetworkWidget_isFalse() {
+        assertThat(preferencesManager.isNetworkWidgetEnabled()).isFalse()
+        assertThat(sharedPreferences.contains(KEY_WIDGET_NETWORK)).isFalse()
+    }
+
+    @Test
+    fun defaultWeatherWidget_isFalse() {
+        assertThat(preferencesManager.isWeatherWidgetEnabled()).isFalse()
+        assertThat(sharedPreferences.contains(KEY_WIDGET_WEATHER)).isFalse()
+    }
+
+    @Test
+    fun defaultNewsWidget_isFalse() {
+        assertThat(preferencesManager.isNewsWidgetEnabled()).isFalse()
+        assertThat(sharedPreferences.contains(KEY_WIDGET_NEWS)).isFalse()
+    }
+
+    // ==========================================
+    // 11. Requirement R5: Toggle & Persistence
+    // ==========================================
+
+    @Test
+    fun toggleBingWallpaper_persistsCorrectly() {
+        preferencesManager.setBingWallpaperEnabled(true)
+        assertThat(preferencesManager.isBingWallpaperEnabled()).isTrue()
+        assertThat(sharedPreferences.getBoolean(KEY_BING_WALLPAPER, false)).isTrue()
+
+        preferencesManager.setBingWallpaperEnabled(false)
+        assertThat(preferencesManager.isBingWallpaperEnabled()).isFalse()
+        assertThat(sharedPreferences.getBoolean(KEY_BING_WALLPAPER, true)).isFalse()
+    }
+
+    @Test
+    fun toggleRamWidget_persistsCorrectly() {
+        preferencesManager.setRamWidgetEnabled(true)
+        assertThat(preferencesManager.isRamWidgetEnabled()).isTrue()
+        assertThat(sharedPreferences.getBoolean(KEY_WIDGET_RAM, false)).isTrue()
+
+        preferencesManager.setRamWidgetEnabled(false)
+        assertThat(preferencesManager.isRamWidgetEnabled()).isFalse()
+        assertThat(sharedPreferences.getBoolean(KEY_WIDGET_RAM, true)).isFalse()
+    }
+
+    @Test
+    fun toggleNetworkWidget_persistsCorrectly() {
+        preferencesManager.setNetworkWidgetEnabled(true)
+        assertThat(preferencesManager.isNetworkWidgetEnabled()).isTrue()
+        assertThat(sharedPreferences.getBoolean(KEY_WIDGET_NETWORK, false)).isTrue()
+
+        preferencesManager.setNetworkWidgetEnabled(false)
+        assertThat(preferencesManager.isNetworkWidgetEnabled()).isFalse()
+        assertThat(sharedPreferences.getBoolean(KEY_WIDGET_NETWORK, true)).isFalse()
+    }
+
+    @Test
+    fun toggleWeatherWidget_persistsCorrectly() {
+        preferencesManager.setWeatherWidgetEnabled(true)
+        assertThat(preferencesManager.isWeatherWidgetEnabled()).isTrue()
+        assertThat(sharedPreferences.getBoolean(KEY_WIDGET_WEATHER, false)).isTrue()
+
+        preferencesManager.setWeatherWidgetEnabled(false)
+        assertThat(preferencesManager.isWeatherWidgetEnabled()).isFalse()
+        assertThat(sharedPreferences.getBoolean(KEY_WIDGET_WEATHER, true)).isFalse()
+    }
+
+    @Test
+    fun toggleNewsWidget_persistsCorrectly() {
+        preferencesManager.setNewsWidgetEnabled(true)
+        assertThat(preferencesManager.isNewsWidgetEnabled()).isTrue()
+        assertThat(sharedPreferences.getBoolean(KEY_WIDGET_NEWS, false)).isTrue()
+
+        preferencesManager.setNewsWidgetEnabled(false)
+        assertThat(preferencesManager.isNewsWidgetEnabled()).isFalse()
+        assertThat(sharedPreferences.getBoolean(KEY_WIDGET_NEWS, true)).isFalse()
+    }
+
+    // ==========================================
+    // 12. Requirement R5: Re-instantiation Persistence
+    // ==========================================
+
+    @Test
+    fun reinstantiation_readsExactSavedR5ValuesFromSamePreferences() {
+        // Step 1: Configure diverse R5 states via instance 1
+        preferencesManager.setBingWallpaperEnabled(true)
+        preferencesManager.setRamWidgetEnabled(true)
+        preferencesManager.setNetworkWidgetEnabled(false)
+        preferencesManager.setWeatherWidgetEnabled(true)
+        preferencesManager.setNewsWidgetEnabled(false)
+
+        // Step 2: Create a second independent instance backed by same context
+        val secondInstance = PreferencesManager(context)
+
+        // Step 3: Assert all persisted R5 values match
+        assertThat(secondInstance.isBingWallpaperEnabled()).isTrue()
+        assertThat(secondInstance.isRamWidgetEnabled()).isTrue()
+        assertThat(secondInstance.isNetworkWidgetEnabled()).isFalse()
+        assertThat(secondInstance.isWeatherWidgetEnabled()).isTrue()
+        assertThat(secondInstance.isNewsWidgetEnabled()).isFalse()
+    }
+
+    // ==========================================
+    // 13. Cross-Instance Concurrency Stress Test (Companion Lock)
+    // ==========================================
+
+    @Test
+    fun crossInstanceConcurrency_companionLockPreventsLostUpdates() {
+        val threadCount = 20
+        val itemsPerThread = 5
+        val executor = java.util.concurrent.Executors.newFixedThreadPool(threadCount)
+        val readyLatch = java.util.concurrent.CountDownLatch(threadCount)
+        val startLatch = java.util.concurrent.CountDownLatch(1)
+        val doneLatch = java.util.concurrent.CountDownLatch(threadCount)
+        val errors = java.util.Collections.synchronizedList(mutableListOf<Throwable>())
+
+        for (t in 0 until threadCount) {
+            executor.submit {
+                // Distinct instance per thread sharing the same preferences file
+                val threadInstance = PreferencesManager(context, isSyncMode = true)
+                readyLatch.countDown()
+                try {
+                    startLatch.await()
+                    for (i in 0 until itemsPerThread) {
+                        val pkg = "com.test.app.t${t}_i${i}"
+                        threadInstance.addFavorite(pkg)
+                    }
+                } catch (e: Throwable) {
+                    errors.add(e)
+                } finally {
+                    doneLatch.countDown()
+                }
+            }
+        }
+
+        readyLatch.await()
+        startLatch.countDown() // Release all threads concurrently
+        val finished = doneLatch.await(15, java.util.concurrent.TimeUnit.SECONDS)
+        executor.shutdown()
+
+        assertThat(finished).isTrue()
+        assertThat(errors).isEmpty()
+
+        // Assert zero lost updates: all 100 items must be present
+        val finalFavorites = PreferencesManager(context).getFavorites()
+        assertThat(finalFavorites).hasSize(threadCount * itemsPerThread)
+        for (t in 0 until threadCount) {
+            for (i in 0 until itemsPerThread) {
+                assertThat(finalFavorites).contains("com.test.app.t${t}_i${i}")
+            }
+        }
+    }
+
+    // ==========================================
+    // 14. Corrupted Storage / ClassCastException Recovery
+    // ==========================================
+
+    @Test
+    fun corruptedR5Values_classCastException_returnsSafeDefaults() {
+        // Inject corrupt non-boolean data into SharedPreferences keys
+        sharedPreferences.edit()
+            .putString(KEY_BING_WALLPAPER, "corrupt_string")
+            .putInt(KEY_WIDGET_RAM, 999)
+            .putString(KEY_WIDGET_NETWORK, "not_a_bool")
+            .putFloat(KEY_WIDGET_WEATHER, 3.14f)
+            .putLong(KEY_WIDGET_NEWS, 123456789L)
+            .commit()
+
+        // Query each getter: must not throw ClassCastException and must return default false
+        assertThat(preferencesManager.isBingWallpaperEnabled()).isFalse()
+        assertThat(preferencesManager.isRamWidgetEnabled()).isFalse()
+        assertThat(preferencesManager.isNetworkWidgetEnabled()).isFalse()
+        assertThat(preferencesManager.isWeatherWidgetEnabled()).isFalse()
+        assertThat(preferencesManager.isNewsWidgetEnabled()).isFalse()
+    }
 }
+

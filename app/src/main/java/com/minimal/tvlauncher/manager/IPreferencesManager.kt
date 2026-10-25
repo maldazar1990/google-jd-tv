@@ -102,4 +102,65 @@ interface IPreferencesManager {
      * Enables or disables D-pad navigation sound feedback.
      */
     fun setAudioFeedbackEnabled(enabled: Boolean)
+
+    // ==========================================
+    // Requirement R5: Wallpaper & Modular Status Widgets
+    // ==========================================
+
+    /**
+     * Returns whether the Bing Daily Wallpaper ("Image of the Day" with dark scrim overlay)
+     * is enabled in place of the default dark gradient.
+     * Defaults to false.
+     */
+    fun isBingWallpaperEnabled(): Boolean
+
+    /**
+     * Enables or disables the Bing Daily Wallpaper.
+     */
+    fun setBingWallpaperEnabled(enabled: Boolean)
+
+    /**
+     * Returns whether the Live RAM usage status widget (Free/Used MB) is enabled in the top status bar.
+     * Defaults to false.
+     */
+    fun isRamWidgetEnabled(): Boolean
+
+    /**
+     * Enables or disables the Live RAM usage status widget.
+     */
+    fun setRamWidgetEnabled(enabled: Boolean)
+
+    /**
+     * Returns whether the Network status widget (Wi-Fi/Ethernet indicator) is enabled in the top status bar.
+     * Defaults to false.
+     */
+    fun isNetworkWidgetEnabled(): Boolean
+
+    /**
+     * Enables or disables the Network status widget.
+     */
+    fun setNetworkWidgetEnabled(enabled: Boolean)
+
+    /**
+     * Returns whether the Weather status widget is enabled in the top status bar.
+     * Defaults to false.
+     */
+    fun isWeatherWidgetEnabled(): Boolean
+
+    /**
+     * Enables or disables the Weather status widget.
+     */
+    fun setWeatherWidgetEnabled(enabled: Boolean)
+
+    /**
+     * Returns whether the Google News RSS headlines ticker widget is enabled in the top status bar.
+     * Defaults to false.
+     */
+    fun isNewsWidgetEnabled(): Boolean
+
+    /**
+     * Enables or disables the Google News RSS headlines ticker widget.
+     */
+    fun setNewsWidgetEnabled(enabled: Boolean)
 }
+
