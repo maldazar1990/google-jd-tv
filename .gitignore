@@ -47,3 +47,7 @@ Thumbs.db
 # System generated / test logs
 .system_generated/
 .agents/
+
+# Configuration privée Google Jules
+GOOGLE_JULES_CONFIG.md
+

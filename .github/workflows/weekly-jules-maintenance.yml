@@ -1,0 +1,29 @@
+name: Weekly Jules Maintenance
+
+on:
+  schedule:
+    # Déclenchement chaque lundi matin à 09:00 UTC (05:00 heure de Montréal/Québec)
+    - cron: '0 9 * * 1'
+  # Permet également de lancer la tâche manuellement à tout moment avec un simple bouton sur GitHub
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  trigger-jules:
+    name: Réveil hebdomadaire de Google Jules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Création de l'Issue automatique pour Jules
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔄 [Auto-Maintenance] Audit et mise à jour hebdomadaire Jules',
+              body: `@jules exécute la Tâche 1 (Mise à jour des dépendances AndroidX) et la Tâche 2 (Audit de sécurité & HTTPS) définies dans AGENTS.md.\n\nContraintes obligatoires :\n1. Empreinte mémoire stricte (< 30 Mo de RAM, aucun framework lourd).\n2. Exécuter et valider ./gradlew testDebugUnitTest --continue.\n3. Ouvrir une Pull Request avec le récapitulatif des tests réussis.`,
+              labels: ['maintenance', 'automated', 'jules']
+            });
