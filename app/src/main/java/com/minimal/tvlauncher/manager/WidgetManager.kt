@@ -57,6 +57,19 @@ class WidgetManager(private val context: Context) {
     }
 
     /**
+     * Formats RAM status string matching tvOS capsule widget: e.g. "RAM: 1.2G libre"
+     */
+    fun formatRamFreeString(): String {
+        val status = getMemoryStatus()
+        return if (status.availMemMb >= 1024) {
+            val gb = status.availMemMb / 1024.0
+            String.format(java.util.Locale.US, "RAM: %.1fG libre", gb)
+        } else {
+            "RAM: ${status.availMemMb}M libre"
+        }
+    }
+
+    /**
      * Inspects active network transport (Ethernet takes priority on TV, then Wi-Fi).
      */
     fun getNetworkStatus(): NetworkType {

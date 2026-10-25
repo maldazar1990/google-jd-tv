@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Thème sobre et ultra-rapide pour Android TV -->
-    <style name="Theme.AppleTVLauncher" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.AppleTVLauncher" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowFullscreen">true</item>

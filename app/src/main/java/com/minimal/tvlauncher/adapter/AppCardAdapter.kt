@@ -22,7 +22,8 @@ import com.minimal.tvlauncher.model.AppModel
 class AppCardAdapter(
     private val preferencesManager: IPreferencesManager,
     private val onAppClick: (AppModel) -> Unit,
-    private val onAppLongClick: (AppModel, View) -> Unit
+    private val onAppLongClick: (AppModel, View) -> Unit,
+    private val onAppFocus: ((AppModel, Boolean) -> Unit)? = null
 ) : RecyclerView.Adapter<AppCardAdapter.AppViewHolder>() {
 
     private val apps = mutableListOf<AppModel>()
@@ -59,7 +60,7 @@ class AppCardAdapter(
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
         val app = apps[position]
-        holder.bind(app, preferencesManager, onAppClick, onAppLongClick)
+        holder.bind(app, preferencesManager, onAppClick, onAppLongClick, onAppFocus)
     }
 
     class AppViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -75,9 +76,11 @@ class AppCardAdapter(
             app: AppModel,
             prefs: IPreferencesManager,
             onClick: (AppModel) -> Unit,
-            onLongClick: (AppModel, View) -> Unit
+            onLongClick: (AppModel, View) -> Unit,
+            onFocus: ((AppModel, Boolean) -> Unit)?
         ) {
             textAppTitle.text = app.label
+            cardRoot.contentDescription = app.label
 
             // Banner or Icon handling with fallback
             if (app.banner != null) {
@@ -86,11 +89,11 @@ class AppCardAdapter(
                 imgAppIcon.scaleType = ImageView.ScaleType.CENTER_CROP
             } else if (app.icon != null) {
                 imgAppIcon.setImageDrawable(app.icon)
-                imgAppIcon.setPadding(18, 18, 18, 18)
+                imgAppIcon.setPadding(16, 16, 16, 16)
                 imgAppIcon.scaleType = ImageView.ScaleType.FIT_CENTER
             } else {
                 imgAppIcon.setImageResource(R.drawable.ic_app_placeholder)
-                imgAppIcon.setPadding(18, 18, 18, 18)
+                imgAppIcon.setPadding(16, 16, 16, 16)
                 imgAppIcon.scaleType = ImageView.ScaleType.FIT_CENTER
             }
 
@@ -99,9 +102,9 @@ class AppCardAdapter(
 
             // Apply customizable icon shape (Squircle, Circle, Rounded Rectangle)
             val cornerRadiusDp = when (prefs.getIconShape()) {
-                PreferencesManager.SHAPE_CIRCLE -> 55f
-                PreferencesManager.SHAPE_ROUNDED_RECT -> 10f
-                else -> 20f // Squircle default
+                PreferencesManager.SHAPE_CIRCLE -> 58f
+                PreferencesManager.SHAPE_ROUNDED_RECT -> 12f
+                else -> 24f // Squircle default
             }
             val density = itemView.resources.displayMetrics.density
             cardView.radius = cornerRadiusDp * density
@@ -113,8 +116,8 @@ class AppCardAdapter(
                 viewFocusBorder.setBackgroundResource(R.drawable.focus_border_high_contrast)
                 textAppTitle.setTextColor(Color.parseColor("#FFFFFF"))
             } else {
-                cardView.setCardBackgroundColor(Color.parseColor("#1E2430"))
-                viewFocusBorder.setBackgroundResource(R.drawable.focus_border_normal)
+                cardView.setCardBackgroundColor(Color.parseColor("#252A36"))
+                viewFocusBorder.setBackgroundResource(R.drawable.focus_border_apple)
                 textAppTitle.setTextColor(Color.parseColor("#F5F7FA"))
             }
 
@@ -122,9 +125,9 @@ class AppCardAdapter(
             cardRoot.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
                     cardContainer.animate()
-                        .scaleX(1.08f)
-                        .scaleY(1.08f)
-                        .translationZ(8f * density)
+                        .scaleX(1.10f)
+                        .scaleY(1.10f)
+                        .translationZ(10f * density)
                         .setDuration(120)
                         .start()
                     viewFocusBorder.visibility = View.VISIBLE
@@ -139,6 +142,7 @@ class AppCardAdapter(
                     viewFocusBorder.visibility = View.INVISIBLE
                     textAppTitle.isSelected = false
                 }
+                onFocus?.invoke(app, hasFocus)
             }
 
             cardRoot.setOnClickListener {

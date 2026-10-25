@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Palette Apple TV (tvOS) -->
+    <color name="bg_launcher_dark">#0D1117</color>
     <color name="bg_dark_top">#14161C</color>
     <color name="bg_dark_bottom">#08090C</color>
     <color name="bg_pure_black">#000000</color>

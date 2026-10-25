@@ -56,6 +56,11 @@ Every feature identified during the Survey phase is mapped to an implementation 
 | 34 | Status Widget: Network Status | Wi-Fi / Ethernet connectivity badge in header with ON/OFF toggle in settings | M4 | R5 Update |
 | 35 | Status Widget: Weather | Weather widget in status header with ON/OFF toggle in settings | M4 | R5 Update |
 | 36 | Status Widget: News Ticker | Google News RSS headlines ticker in top bar with ON/OFF toggle in settings | M4 | R5 Update |
+| 37 | Apple TV Frosted Dock Shelf | Frosted glass dock at bottom with squircle app icons matching concept mockup | M4 | Mockup |
+| 38 | Top-Right Status Bar Capsules | Translucent glass capsules for RAM Free, Wi-Fi 6, Weather 21°C, Settings gear | M4 | Mockup |
+| 39 | Center News Ticker Pill | Centered floating pill with marquee Google News RSS headlines | M4 | Mockup |
+| 40 | Alpine Lake Wallpaper Engine | 4K scenic alpine lake default wallpaper with Bing Daily HTTPS refresh & scrim | M4 | Mockup |
+| 41 | Unit Test Suite 100% Pass Rate | All unit tests (core data, widgets, UI discovery) passing without error | M5 | Testing |
 
 ---
 
