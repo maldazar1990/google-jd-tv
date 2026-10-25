@@ -76,10 +76,18 @@ Pour tout agent travaillant sur le dépôt :
 
 2. **Rôle du Sub-Agent Intégrateur ("Integrator / CI Gatekeeper")** :
    - Seul le sub-agent intégrateur est habilité à merger du code vers `main`.
-   - **Procédure d'intégration obligatoire** :
+   - **Procédure d'intégration obligatoire** (suivant le skill `.skills/tv-testing/SKILL.md`) :
      1. Rebase de la branche de fonctionnalité sur `main`.
      2. Résolution défensive d'éventuels conflits de fusion (XML, Gradle, Manifest).
-     3. Exécution stricte de la validation : `./gradlew testDebugUnitTest`.
-     4. En cas d'échec : rejet immédiat avec rapport d'erreurs transmis à l'agent émetteur.
-     5. En cas de succès : Merge (Fast-Forward ou Merge Commit propre) vers `main`, suivi d'un `git push origin main`.
+     3. **Audit Backend** : Exécution stricte de `./gradlew testDebugUnitTest` (persistance, modèles, résilience réseau).
+     4. **Audit Frontend** : Vérification D-Pad (absence de focus trap, 60 fps, accessibilité WCAG TalkBack & contraste).
+     5. En cas d'échec : rejet immédiat avec rapport d'erreurs transmis à l'agent émetteur.
+     6. En cas de succès : Merge vers `main`.
+
+3. **Numérotation des Versions & Tagging Automatisé** :
+   - Dès qu'une version fonctionnelle est prête pour release :
+     - Incrémenter `versionCode` et `versionName` (SemVer `vX.Y.Z`) dans `app/build.gradle.kts`.
+     - Créer un tag Git annoté (`git tag -a vX.Y.Z -m "..."`).
+     - Mettre à jour `CHANGELOG.md` et pousser les tags sur `origin`.
+
 
