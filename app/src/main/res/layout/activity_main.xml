@@ -9,7 +9,7 @@
     android:clipChildren="false"
     android:clipToPadding="false">
 
-    <!-- Scenic Wallpaper Background (Bing 4K / Bundled Alpine Lake) -->
+    <!-- Scenic Wallpaper Background (Bing 4K / Alpine Lake / Storage / Google Photos) -->
     <ImageView
         android:id="@+id/image_wallpaper"
         android:layout_width="match_parent"
@@ -25,266 +25,279 @@
         android:layout_height="match_parent"
         android:background="#350A101C" />
 
-    <!-- Main Content Layout -->
-    <RelativeLayout
+    <!-- Vertical Smooth Scroll Container -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingStart="44dp"
-        android:paddingTop="28dp"
-        android:paddingEnd="44dp"
-        android:paddingBottom="24dp">
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
 
-        <!-- ======================================================== -->
-        <!-- TOP HEADER BAR: Clock/Date on Left, Status Pills on Right -->
-        <!-- ======================================================== -->
-        <RelativeLayout
-            android:id="@+id/top_header_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:clipChildren="false"
-            android:clipToPadding="false">
-
-            <!-- Left: Clock and Date inline -->
-            <LinearLayout
-                android:id="@+id/layout_clock_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextClock
-                    android:id="@+id/text_clock"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:format12Hour="HH:mm"
-                    android:format24Hour="HH:mm"
-                    android:textColor="#FFFFFF"
-                    android:textSize="36sp"
-                    android:textStyle="bold" />
-
-                <TextClock
-                    android:id="@+id/text_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:fontFamily="sans-serif"
-                    android:format12Hour="EEEE d MMMM"
-                    android:format24Hour="EEEE d MMMM"
-                    android:textColor="#D0FFFFFF"
-                    android:textSize="17sp" />
-            </LinearLayout>
-
-            <!-- Right: Status Capsules (RAM, Network, Weather, Settings) -->
-            <LinearLayout
-                android:id="@+id/layout_status_capsules"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <!-- Capsule 1: RAM Free -->
-                <LinearLayout
-                    android:id="@+id/widget_ram_container"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_capsule_pill"
-                    android:gravity="center"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
-
-                    <TextView
-                        android:id="@+id/text_widget_ram"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        tools:text="RAM: 1.2G libre" />
-                </LinearLayout>
-
-                <!-- Capsule 2: Network Connectivity -->
-                <LinearLayout
-                    android:id="@+id/widget_network_container"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_capsule_pill"
-                    android:gravity="center"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="16dp">
-
-                    <ImageView
-                        android:id="@+id/icon_widget_network"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="8dp"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_wifi"
-                        app:tint="#FFFFFF" />
-
-                    <TextView
-                        android:id="@+id/text_widget_network"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:text="Wi-Fi 6" />
-                </LinearLayout>
-
-                <!-- Capsule 3: Weather -->
-                <LinearLayout
-                    android:id="@+id/widget_weather_container"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_capsule_pill"
-                    android:gravity="center"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="16dp">
-
-                    <ImageView
-                        android:id="@+id/icon_widget_weather"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="8dp"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_weather"
-                        app:tint="#FFFFFF" />
-
-                    <TextView
-                        android:id="@+id/text_widget_weather"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:text="21°C" />
-                </LinearLayout>
-
-                <!-- Capsule 4: Settings Button -->
-                <FrameLayout
-                    android:id="@+id/btn_settings"
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:background="@drawable/bg_capsule_pill_selector"
-                    android:clickable="true"
-                    android:contentDescription="@string/settings_title"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:id="@+id/icon_settings"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_settings"
-                        app:tint="#FFFFFF" />
-                </FrameLayout>
-            </LinearLayout>
-        </RelativeLayout>
-
-        <!-- ======================================================== -->
-        <!-- CENTER: Google News RSS Headlines Ticker Capsule           -->
-        <!-- ======================================================== -->
-        <FrameLayout
-            android:id="@+id/widget_news_container"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_above="@id/layout_app_tiers"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/bg_capsule_pill"
-            android:paddingStart="22dp"
-            android:paddingEnd="22dp">
-
-            <TextView
-                android:id="@+id/text_widget_news"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:ellipsize="marquee"
-                android:fadingEdge="horizontal"
-                android:fadingEdgeLength="20dp"
-                android:fontFamily="sans-serif-medium"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:maxWidth="820dp"
-                android:singleLine="true"
-                android:textColor="#F0FFFFFF"
-                android:textSize="14sp"
-                tools:text="Google News : Découverte majeure dans l'exploration spatiale..." />
-        </FrameLayout>
-
-        <!-- ======================================================== -->
-        <!-- BOTTOM: 2-Tier Apple TV Layout (Dock + Drawer)             -->
-        <!-- ======================================================== -->
         <LinearLayout
-            android:id="@+id/layout_app_tiers"
+            android:id="@+id/scroll_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <!-- Tier 1: Apple TV Frosted Glass Dock with Favorite Apps -->
-            <FrameLayout
-                android:id="@+id/dock_shelf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/bg_tvos_dock"
+            <!-- ======================================================== -->
+            <!-- PAGE 1: Home Screen Viewport (Dock at Bottom at Rest)     -->
+            <!-- ======================================================== -->
+            <RelativeLayout
+                android:id="@+id/home_screen_viewport"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:clipChildren="false"
                 android:clipToPadding="false"
-                android:paddingStart="14dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="14dp"
-                android:paddingBottom="10dp">
+                android:paddingStart="44dp"
+                android:paddingTop="28dp"
+                android:paddingEnd="44dp"
+                android:paddingBottom="24dp">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_favorites"
+                <!-- TOP HEADER BAR: Clock/Date on Left, Status Pills on Right -->
+                <RelativeLayout
+                    android:id="@+id/top_header_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <!-- Left: Clock and Date inline -->
+                    <LinearLayout
+                        android:id="@+id/layout_clock_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextClock
+                            android:id="@+id/text_clock"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:format12Hour="HH:mm"
+                            android:format24Hour="HH:mm"
+                            android:textColor="#FFFFFF"
+                            android:textSize="36sp"
+                            android:textStyle="bold" />
+
+                        <TextClock
+                            android:id="@+id/text_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:fontFamily="sans-serif"
+                            android:format12Hour="EEEE d MMMM"
+                            android:format24Hour="EEEE d MMMM"
+                            android:textColor="#D0FFFFFF"
+                            android:textSize="17sp" />
+                    </LinearLayout>
+
+                    <!-- Right: Status Capsules (RAM, Network, Weather, Settings) -->
+                    <LinearLayout
+                        android:id="@+id/layout_status_capsules"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <!-- Capsule 1: RAM Free -->
+                        <LinearLayout
+                            android:id="@+id/widget_ram_container"
+                            android:layout_width="wrap_content"
+                            android:layout_height="38dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/bg_capsule_pill"
+                            android:gravity="center"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp">
+
+                            <TextView
+                                android:id="@+id/text_widget_ram"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="#FFFFFF"
+                                android:textSize="13sp"
+                                tools:text="RAM: 1.2G libre" />
+                        </LinearLayout>
+
+                        <!-- Capsule 2: Network Connectivity -->
+                        <LinearLayout
+                            android:id="@+id/widget_network_container"
+                            android:layout_width="wrap_content"
+                            android:layout_height="38dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/bg_capsule_pill"
+                            android:gravity="center"
+                            android:paddingStart="14dp"
+                            android:paddingEnd="16dp">
+
+                            <ImageView
+                                android:id="@+id/icon_widget_network"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="8dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_wifi"
+                                app:tint="#FFFFFF" />
+
+                            <TextView
+                                android:id="@+id/text_widget_network"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="#FFFFFF"
+                                android:textSize="13sp"
+                                android:text="Wi-Fi 6" />
+                        </LinearLayout>
+
+                        <!-- Capsule 3: Weather -->
+                        <LinearLayout
+                            android:id="@+id/widget_weather_container"
+                            android:layout_width="wrap_content"
+                            android:layout_height="38dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/bg_capsule_pill"
+                            android:gravity="center"
+                            android:paddingStart="14dp"
+                            android:paddingEnd="16dp">
+
+                            <ImageView
+                                android:id="@+id/icon_widget_weather"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="8dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_weather"
+                                app:tint="#FFFFFF" />
+
+                            <TextView
+                                android:id="@+id/text_widget_weather"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="#FFFFFF"
+                                android:textSize="13sp"
+                                android:text="21°C" />
+                        </LinearLayout>
+
+                        <!-- Capsule 4: Settings Button -->
+                        <FrameLayout
+                            android:id="@+id/btn_settings"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:background="@drawable/bg_capsule_pill_selector"
+                            android:clickable="true"
+                            android:contentDescription="@string/settings_title"
+                            android:focusable="true">
+
+                            <ImageView
+                                android:id="@+id/icon_settings"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_settings"
+                                app:tint="#FFFFFF" />
+                        </FrameLayout>
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <!-- CENTER: Google News RSS Headlines Ticker Capsule -->
+                <FrameLayout
+                    android:id="@+id/widget_news_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_above="@id/dock_shelf"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="24dp"
+                    android:background="@drawable/bg_capsule_pill"
+                    android:paddingStart="22dp"
+                    android:paddingEnd="22dp">
+
+                    <TextView
+                        android:id="@+id/text_widget_news"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:ellipsize="marquee"
+                        android:fadingEdge="horizontal"
+                        android:fadingEdgeLength="20dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:maxWidth="820dp"
+                        android:singleLine="true"
+                        android:textColor="#F0FFFFFF"
+                        android:textSize="14sp"
+                        tools:text="Google News : Découverte majeure dans l'exploration spatiale..." />
+                </FrameLayout>
+
+                <!-- BOTTOM DOCK SHELF: Exactly 5 Widescreen Favorite Apps -->
+                <FrameLayout
+                    android:id="@+id/dock_shelf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/bg_tvos_dock"
                     android:clipChildren="false"
                     android:clipToPadding="false"
-                    android:descendantFocusability="afterDescendants"
-                    android:focusable="false"
-                    android:orientation="horizontal"
-                    android:overScrollMode="never"
-                    tools:listitem="@layout/item_app_card" />
+                    android:paddingStart="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="14dp"
+                    android:paddingBottom="10dp">
 
-            </FrameLayout>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_favorites"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
+                        android:descendantFocusability="afterDescendants"
+                        android:focusable="false"
+                        android:orientation="horizontal"
+                        android:overScrollMode="never"
+                        tools:listitem="@layout/item_app_card" />
 
-            <!-- Tier 2: Drawer Header & App Row -->
+                </FrameLayout>
+
+            </RelativeLayout>
+
+            <!-- ======================================================== -->
+            <!-- PAGE 2: All Apps Drawer Grid (Revealed upon Scroll Down)  -->
+            <!-- ======================================================== -->
             <LinearLayout
                 android:id="@+id/drawer_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:clipChildren="false"
                 android:clipToPadding="false"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingStart="44dp"
+                android:paddingTop="32dp"
+                android:paddingEnd="44dp"
+                android:paddingBottom="48dp">
 
                 <TextView
                     android:id="@+id/text_drawer_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_marginBottom="4dp"
+                    android:layout_marginBottom="12dp"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Autres applications"
-                    android:textColor="#C0FFFFFF"
-                    android:textSize="13sp" />
+                    android:text="Toutes les applications"
+                    android:textColor="#E0FFFFFF"
+                    android:textSize="17sp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_drawer"
@@ -294,7 +307,6 @@
                     android:clipToPadding="false"
                     android:descendantFocusability="afterDescendants"
                     android:focusable="false"
-                    android:orientation="horizontal"
                     android:overScrollMode="never"
                     tools:listitem="@layout/item_app_card" />
 
@@ -302,16 +314,16 @@
 
         </LinearLayout>
 
-        <!-- Loader -->
-        <ProgressBar
-            android:id="@+id/progress_loader"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_centerInParent="true"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/focus_glow_apple"
-            android:visibility="gone" />
+    </androidx.core.widget.NestedScrollView>
 
-    </RelativeLayout>
+    <!-- Loader -->
+    <ProgressBar
+        android:id="@+id/progress_loader"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/focus_glow_apple"
+        android:visibility="gone" />
 
 </FrameLayout>

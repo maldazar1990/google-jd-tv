@@ -9,6 +9,10 @@
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">bing.com</domain>
         <domain includeSubdomains="true">google.com</domain>
+        <domain includeSubdomains="true">googleusercontent.com</domain>
         <domain includeSubdomains="true">open-meteo.com</domain>
+        <domain includeSubdomains="true">ipapi.co</domain>
+        <domain includeSubdomains="true">ipwho.is</domain>
+        <domain includeSubdomains="true">espn.com</domain>
     </domain-config>
 </network-security-config>

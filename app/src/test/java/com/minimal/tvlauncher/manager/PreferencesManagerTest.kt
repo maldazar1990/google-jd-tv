@@ -555,5 +555,106 @@ class PreferencesManagerTest {
         assertThat(preferencesManager.isWeatherWidgetEnabled()).isFalse()
         assertThat(preferencesManager.isNewsWidgetEnabled()).isFalse()
     }
-}
 
+    // ==========================================
+    // 15. Extended Wallpaper, Weather & News Tests
+    // ==========================================
+
+    @Test
+    fun wallpaperSources_persistsAndSanitizes() {
+        preferencesManager.setWallpaperSource(PreferencesManager.WALLPAPER_BING)
+        assertThat(preferencesManager.getWallpaperSource()).isEqualTo(PreferencesManager.WALLPAPER_BING)
+        assertThat(preferencesManager.isBingWallpaperEnabled()).isTrue()
+
+        preferencesManager.setWallpaperSource(PreferencesManager.WALLPAPER_STORAGE)
+        assertThat(preferencesManager.getWallpaperSource()).isEqualTo(PreferencesManager.WALLPAPER_STORAGE)
+
+        preferencesManager.setWallpaperStoragePath("/sdcard/Pictures/my_wall.png")
+        assertThat(preferencesManager.getWallpaperStoragePath()).isEqualTo("/sdcard/Pictures/my_wall.png")
+
+        preferencesManager.setWallpaperSource("invalid_source")
+        assertThat(preferencesManager.getWallpaperSource()).isEqualTo(PreferencesManager.DEFAULT_WALLPAPER_SOURCE)
+    }
+
+    @Test
+    fun weatherPreferences_autoAndManual_persistsCorrectly() {
+        preferencesManager.setWeatherAutoLocation(false)
+        assertThat(preferencesManager.isWeatherAutoLocation()).isFalse()
+
+        preferencesManager.setWeatherCity("Paris")
+        assertThat(preferencesManager.getWeatherCity()).isEqualTo("Paris")
+
+        preferencesManager.setWeatherCoordinates(48.8566, 2.3522)
+        assertThat(preferencesManager.getWeatherLatitude()).isEqualTo(48.8566)
+        assertThat(preferencesManager.getWeatherLongitude()).isEqualTo(2.3522)
+    }
+
+    @Test
+    fun newsPreferences_topicsAndSources_persistsCorrectly() {
+        preferencesManager.setNewsTopic(PreferencesManager.TOPIC_TECHNOLOGY)
+        assertThat(preferencesManager.getNewsTopic()).isEqualTo(PreferencesManager.TOPIC_TECHNOLOGY)
+
+        val topics = setOf(PreferencesManager.TOPIC_TECHNOLOGY, PreferencesManager.TOPIC_SCIENCE)
+        preferencesManager.setNewsTopics(topics)
+        assertThat(preferencesManager.getNewsTopics()).containsExactly(PreferencesManager.TOPIC_TECHNOLOGY, PreferencesManager.TOPIC_SCIENCE)
+
+        val sources = setOf("Radio-Canada", "La Presse")
+        preferencesManager.setNewsSources(sources)
+        assertThat(preferencesManager.getNewsSources()).containsExactly("Radio-Canada", "La Presse")
+
+        preferencesManager.setNewsCustomKeyword("Intelligence Artificielle")
+        assertThat(preferencesManager.getNewsCustomKeyword()).isEqualTo("Intelligence Artificielle")
+    }
+
+    @Test
+    fun drawerColumnsAndScrollMode_persistsAndClamped() {
+        assertThat(preferencesManager.getDrawerColumns()).isEqualTo(5)
+
+        preferencesManager.setDrawerColumns(4)
+        assertThat(preferencesManager.getDrawerColumns()).isEqualTo(4)
+
+        preferencesManager.setDrawerColumns(2) // Below min 3
+        assertThat(preferencesManager.getDrawerColumns()).isEqualTo(3)
+
+        preferencesManager.setDrawerColumns(10) // Above max 6
+        assertThat(preferencesManager.getDrawerColumns()).isEqualTo(6)
+
+        preferencesManager.setScrollMode(PreferencesManager.SCROLL_MODE_PAGE)
+        assertThat(preferencesManager.getScrollMode()).isEqualTo(PreferencesManager.SCROLL_MODE_PAGE)
+
+        preferencesManager.setScrollMode("invalid_mode")
+        assertThat(preferencesManager.getScrollMode()).isEqualTo(PreferencesManager.DEFAULT_SCROLL_MODE)
+    }
+
+    @Test
+    fun topShelf_persistsCorrectly() {
+        assertThat(preferencesManager.isTopShelfEnabled()).isTrue()
+        preferencesManager.setTopShelfEnabled(false)
+        assertThat(preferencesManager.isTopShelfEnabled()).isFalse()
+        preferencesManager.setTopShelfEnabled(true)
+        assertThat(preferencesManager.isTopShelfEnabled()).isTrue()
+    }
+
+    @Test
+    fun sportsWidgetPreferences_persistsCorrectly() {
+        assertThat(preferencesManager.isSportsWidgetEnabled()).isFalse()
+        preferencesManager.setSportsWidgetEnabled(true)
+        assertThat(preferencesManager.isSportsWidgetEnabled()).isTrue()
+
+        preferencesManager.setSportsType(com.minimal.tvlauncher.manager.SportsManager.SPORT_NBA)
+        assertThat(preferencesManager.getSportsType()).isEqualTo(com.minimal.tvlauncher.manager.SportsManager.SPORT_NBA)
+
+        preferencesManager.setSportsSource(com.minimal.tvlauncher.manager.SportsManager.SOURCE_GOOGLE)
+        assertThat(preferencesManager.getSportsSource()).isEqualTo(com.minimal.tvlauncher.manager.SportsManager.SOURCE_GOOGLE)
+
+        preferencesManager.setSportsFavoriteTeam("Canadiens")
+        assertThat(preferencesManager.getSportsFavoriteTeam()).isEqualTo("Canadiens")
+    }
+
+    @Test
+    fun platformOverride_persistsCorrectly() {
+        assertThat(preferencesManager.getPlatformOverride()).isEqualTo("AUTO")
+        preferencesManager.setPlatformOverride("FIRE_TV")
+        assertThat(preferencesManager.getPlatformOverride()).isEqualTo("FIRE_TV")
+    }
+}

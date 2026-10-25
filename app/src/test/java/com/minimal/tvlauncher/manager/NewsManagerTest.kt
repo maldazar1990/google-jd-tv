@@ -60,4 +60,28 @@ class NewsManagerTest {
         assertThat(ticker).isNotEmpty()
         assertThat(ticker).startsWith("Google News :")
     }
+
+    @Test
+    fun buildRssUrl_default_returnsStandardRssUrl() {
+        val url = newsManager.buildRssUrl()
+        assertThat(url).isEqualTo(NewsManager.RSS_URL)
+    }
+
+    @Test
+    fun buildRssUrl_withTopicsAndSources_buildsCorrectQuery() {
+        val topics = setOf(PreferencesManager.TOPIC_TECHNOLOGY)
+        val sources = setOf("Radio-Canada", "La Presse")
+        val url = newsManager.buildRssUrl(topics = topics, sources = sources)
+
+        assertThat(url).contains("https://news.google.com/rss/search?q=")
+        assertThat(url).contains("Radio-Canada")
+        assertThat(url).contains("La+Presse")
+        assertThat(url).contains("Technologie")
+    }
+
+    @Test
+    fun buildRssUrl_withCustomKeyword_buildsEncodedQuery() {
+        val url = newsManager.buildRssUrl(customKeyword = "Intelligence Artificielle")
+        assertThat(url).contains("Intelligence+Artificielle")
+    }
 }

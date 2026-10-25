@@ -12,6 +12,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.minimal.tvlauncher.R
+import com.minimal.tvlauncher.config.AppConfig
 import com.minimal.tvlauncher.manager.IPreferencesManager
 import com.minimal.tvlauncher.manager.PreferencesManager
 import com.minimal.tvlauncher.model.AppModel
@@ -118,7 +119,7 @@ class AppCardAdapter(
             val cornerRadiusDp = when (prefs.getIconShape()) {
                 PreferencesManager.SHAPE_CIRCLE -> 47f
                 PreferencesManager.SHAPE_ROUNDED_RECT -> 10f
-                else -> 18f // Widescreen squircle default
+                else -> AppConfig.Ui.CARD_CORNER_RADIUS_DP // Widescreen squircle default
             }
             val density = itemView.resources.displayMetrics.density
             cardView.radius = cornerRadiusDp * density
@@ -142,10 +143,10 @@ class AppCardAdapter(
                         v.playSoundEffect(SoundEffectConstants.NAVIGATION_RIGHT)
                     }
                     cardContainer.animate()
-                        .scaleX(1.08f)
-                        .scaleY(1.08f)
+                        .scaleX(AppConfig.Ui.FOCUS_SCALE_FACTOR)
+                        .scaleY(AppConfig.Ui.FOCUS_SCALE_FACTOR)
                         .translationZ(10f * density)
-                        .setDuration(120)
+                        .setDuration(AppConfig.Ui.FOCUS_ANIMATION_DURATION_MS)
                         .start()
                     viewFocusBorder.visibility = View.VISIBLE
                     textAppTitle.isSelected = true
@@ -154,7 +155,7 @@ class AppCardAdapter(
                         .scaleX(1.0f)
                         .scaleY(1.0f)
                         .translationZ(0f)
-                        .setDuration(120)
+                        .setDuration(AppConfig.Ui.FOCUS_ANIMATION_DURATION_MS)
                         .start()
                     viewFocusBorder.visibility = View.INVISIBLE
                     textAppTitle.isSelected = false

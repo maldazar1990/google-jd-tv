@@ -61,6 +61,10 @@ Every feature identified during the Survey phase is mapped to an implementation 
 | 39 | Center News Ticker Pill | Centered floating pill with marquee Google News RSS headlines | M4 | Mockup |
 | 40 | Alpine Lake Wallpaper Engine | 4K scenic alpine lake default wallpaper with Bing Daily HTTPS refresh & scrim | M4 | Mockup |
 | 41 | Unit Test Suite 100% Pass Rate | All unit tests (core data, widgets, UI discovery) passing without error | M5 | Testing |
+| 42 | Top Shelf TvContract Engine | Dynamic Watch Next / Featured series banner above dock with ON/OFF toggle in settings | M4 | TvContract |
+| 43 | Multi-Platform Abstraction | TV Platform abstraction layer supporting Google TV, Android TV and Amazon Fire TV | M4 | Architecture |
+| 44 | Live Sports Widget | Real-time match scores and live results ticker with league selector | M4 | Sports |
+| 45 | Display & Refresh Rate Engine | Dynamic handling of 4K, 1080p, 720p TV resolutions, 50/60/120Hz display modes and HDMI overscan safe zones | M4 | Hardware |
 
 ---
 
