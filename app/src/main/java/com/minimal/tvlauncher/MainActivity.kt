@@ -212,7 +212,8 @@ class MainActivity : FragmentActivity() {
                     }
                 }
             },
-            nextFocusDownId = R.id.recycler_drawer
+            nextFocusDownId = R.id.recycler_drawer,
+            nextFocusUpId = R.id.btn_settings
         )
         recyclerFavorites.adapter = favoritesAdapter
 
@@ -230,9 +231,9 @@ class MainActivity : FragmentActivity() {
             showSettingsDialog()
         }
 
-        widgetNewsContainer.setOnClickListener {
-            refreshWidgetsAsync()
-        }
+        // Informational only: News ticker is strictly non-focusable & non-clickable
+        widgetNewsContainer.isFocusable = false
+        widgetNewsContainer.isClickable = false
     }
 
     private fun registerPackageReceiver() {
