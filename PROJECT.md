@@ -56,6 +56,15 @@ Every feature identified during the Survey phase is mapped to an implementation 
 | 34 | Status Widget: Network Status | Wi-Fi / Ethernet connectivity badge in header with ON/OFF toggle in settings | M4 | R5 Update |
 | 35 | Status Widget: Weather | Weather widget in status header with ON/OFF toggle in settings | M4 | R5 Update |
 | 36 | Status Widget: News Ticker | Google News RSS headlines ticker in top bar with ON/OFF toggle in settings | M4 | R5 Update |
+| 37 | Apple TV Frosted Dock Shelf | Frosted glass dock at bottom with squircle app icons matching concept mockup | M4 | Mockup |
+| 38 | Top-Right Status Bar Capsules | Translucent glass capsules for RAM Free, Wi-Fi 6, Weather 21°C, Settings gear | M4 | Mockup |
+| 39 | Center News Ticker Pill | Centered floating pill with marquee Google News RSS headlines | M4 | Mockup |
+| 40 | Alpine Lake Wallpaper Engine | 4K scenic alpine lake default wallpaper with Bing Daily HTTPS refresh & scrim | M4 | Mockup |
+| 41 | Unit Test Suite 100% Pass Rate | All unit tests (core data, widgets, UI discovery) passing without error | M5 | Testing |
+| 42 | Top Shelf TvContract Engine | Dynamic Watch Next / Featured series banner above dock with ON/OFF toggle in settings | M4 | TvContract |
+| 43 | Multi-Platform Abstraction | TV Platform abstraction layer supporting Google TV, Android TV and Amazon Fire TV | M4 | Architecture |
+| 44 | Live Sports Widget | Real-time match scores and live results ticker with league selector | M4 | Sports |
+| 45 | Display & Refresh Rate Engine | Dynamic handling of 4K, 1080p, 720p TV resolutions, 50/60/120Hz display modes and HDMI overscan safe zones | M4 | Hardware |
 
 ---
 

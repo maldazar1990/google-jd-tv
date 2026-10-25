@@ -1,0 +1,944 @@
+package com.minimal.tvlauncher
+
+import android.app.AlertDialog
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentFilter
+import android.graphics.Color
+import android.net.Uri
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
+import android.view.KeyEvent
+import android.view.View
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.TextView
+import androidx.core.widget.NestedScrollView
+import androidx.fragment.app.FragmentActivity
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.minimal.tvlauncher.adapter.AppCardAdapter
+import com.minimal.tvlauncher.config.AppConfig
+import com.minimal.tvlauncher.manager.AppDiscoveryManager
+import com.minimal.tvlauncher.manager.BingWallpaperManager
+import com.minimal.tvlauncher.manager.DisplayResolutionManager
+import com.minimal.tvlauncher.manager.IPreferencesManager
+import com.minimal.tvlauncher.manager.NewsManager
+import com.minimal.tvlauncher.manager.PreferencesManager
+import com.minimal.tvlauncher.manager.SportsManager
+import com.minimal.tvlauncher.manager.TopShelfManager
+import com.minimal.tvlauncher.manager.WeatherManager
+import com.minimal.tvlauncher.manager.WidgetManager
+import com.minimal.tvlauncher.model.AppModel
+import com.minimal.tvlauncher.platform.PlatformManager
+import java.util.concurrent.Executors
+
+class MainActivity : FragmentActivity() {
+
+    companion object {
+        const val DOCK_MAX_CAPACITY = AppConfig.Ui.DOCK_MAX_APPS
+    }
+
+    private lateinit var preferencesManager: PreferencesManager
+    private lateinit var discoveryManager: AppDiscoveryManager
+    private lateinit var widgetManager: WidgetManager
+    private lateinit var wallpaperManager: BingWallpaperManager
+    private lateinit var newsManager: NewsManager
+    private lateinit var weatherManager: WeatherManager
+    private lateinit var sportsManager: SportsManager
+    private lateinit var topShelfManager: TopShelfManager
+    private lateinit var platformManager: PlatformManager
+    private lateinit var displayResolutionManager: DisplayResolutionManager
+
+    private lateinit var mainRoot: FrameLayout
+    private lateinit var imageWallpaper: ImageView
+    private lateinit var viewScrim: View
+    private lateinit var scrollContainer: NestedScrollView
+    private lateinit var homeScreenViewport: RelativeLayout
+
+    private lateinit var recyclerFavorites: RecyclerView
+    private lateinit var recyclerDrawer: RecyclerView
+    private lateinit var drawerContainer: LinearLayout
+    private lateinit var textDrawerTitle: TextView
+    private lateinit var progressLoader: ProgressBar
+    private lateinit var btnSettings: FrameLayout
+
+    // Status Widgets
+    private lateinit var widgetRamContainer: LinearLayout
+    private lateinit var textWidgetRam: TextView
+    private lateinit var widgetNetworkContainer: LinearLayout
+    private lateinit var iconWidgetNetwork: ImageView
+    private lateinit var textWidgetNetwork: TextView
+    private lateinit var widgetWeatherContainer: LinearLayout
+    private lateinit var iconWidgetWeather: ImageView
+    private lateinit var textWidgetWeather: TextView
+
+    // News / Top Shelf / Sports Ticker
+    private lateinit var widgetNewsContainer: FrameLayout
+    private lateinit var textWidgetNews: TextView
+
+    private lateinit var favoritesAdapter: AppCardAdapter
+    private lateinit var drawerAdapter: AppCardAdapter
+    private val backgroundExecutor = Executors.newFixedThreadPool(2)
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private val packageChangeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            loadAppsAsync()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        preferencesManager = PreferencesManager(this)
+        discoveryManager = AppDiscoveryManager(this, preferencesManager)
+        widgetManager = WidgetManager(this)
+        wallpaperManager = BingWallpaperManager(this)
+        newsManager = NewsManager()
+        weatherManager = WeatherManager()
+        sportsManager = SportsManager()
+        topShelfManager = TopShelfManager(this)
+        platformManager = PlatformManager(preferencesManager.getPlatformOverride())
+        displayResolutionManager = DisplayResolutionManager(this)
+
+        ensureDefaultWidgetPreferences()
+        initViews()
+        setupRecyclerViews()
+        setupListeners()
+        registerPackageReceiver()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        platformManager = PlatformManager(preferencesManager.getPlatformOverride())
+        applyThemeAndPreferences()
+        loadAppsAsync()
+        refreshWidgetsAsync()
+        refreshWallpaperAsync()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            unregisterReceiver(packageChangeReceiver)
+        } catch (_: Exception) {
+        }
+        backgroundExecutor.shutdown()
+    }
+
+    private fun ensureDefaultWidgetPreferences() {
+        val sharedPrefs = getSharedPreferences(PreferencesManager.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!sharedPrefs.contains("pref_tvos_layout_initialized")) {
+            sharedPrefs.edit()
+                .putBoolean("pref_tvos_layout_initialized", true)
+                .putBoolean(PreferencesManager.PREF_BING_WALLPAPER, true)
+                .putBoolean(PreferencesManager.PREF_WIDGET_RAM, true)
+                .putBoolean(PreferencesManager.PREF_WIDGET_NETWORK, true)
+                .putBoolean(PreferencesManager.PREF_WIDGET_WEATHER, true)
+                .putBoolean(PreferencesManager.PREF_WIDGET_NEWS, true)
+                .apply()
+        }
+    }
+
+    private fun initViews() {
+        mainRoot = findViewById(R.id.main_root)
+        imageWallpaper = findViewById(R.id.image_wallpaper)
+        viewScrim = findViewById(R.id.view_scrim)
+        scrollContainer = findViewById(R.id.scroll_container)
+        homeScreenViewport = findViewById(R.id.home_screen_viewport)
+
+        val screenHeight = resources.displayMetrics.heightPixels
+        homeScreenViewport.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            screenHeight
+        )
+
+        recyclerFavorites = findViewById(R.id.recycler_favorites)
+        recyclerDrawer = findViewById(R.id.recycler_drawer)
+        drawerContainer = findViewById(R.id.drawer_container)
+        textDrawerTitle = findViewById(R.id.text_drawer_title)
+        progressLoader = findViewById(R.id.progress_loader)
+        btnSettings = findViewById(R.id.btn_settings)
+
+        widgetRamContainer = findViewById(R.id.widget_ram_container)
+        textWidgetRam = findViewById(R.id.text_widget_ram)
+        widgetNetworkContainer = findViewById(R.id.widget_network_container)
+        iconWidgetNetwork = findViewById(R.id.icon_widget_network)
+        textWidgetNetwork = findViewById(R.id.text_widget_network)
+        widgetWeatherContainer = findViewById(R.id.widget_weather_container)
+        iconWidgetWeather = findViewById(R.id.icon_widget_weather)
+        textWidgetWeather = findViewById(R.id.text_widget_weather)
+
+        widgetNewsContainer = findViewById(R.id.widget_news_container)
+        textWidgetNews = findViewById(R.id.text_widget_news)
+
+        textWidgetNews.isSelected = true
+    }
+
+    private fun setupRecyclerViews() {
+        recyclerFavorites.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
+        val columns = preferencesManager.getDrawerColumns()
+        recyclerDrawer.layoutManager = GridLayoutManager(this, columns)
+
+        favoritesAdapter = AppCardAdapter(
+            preferencesManager = preferencesManager,
+            onAppClick = { app -> discoveryManager.launchApp(app) },
+            onAppLongClick = { app, _ -> showAppContextMenu(app) },
+            onAppFocus = { app, hasFocus ->
+                // Top Shelf Preview on Dock hover
+                if (hasFocus && preferencesManager.isTopShelfEnabled()) {
+                    backgroundExecutor.execute {
+                        val item = topShelfManager.getTopShelfItemForPackage(app.packageName)
+                        if (item != null) {
+                            mainHandler.post {
+                                val epText = item.subtitle?.let { " - $it" } ?: ""
+                                textWidgetNews.text = "▶ ${item.title}$epText"
+                                textWidgetNews.isSelected = true
+                                widgetNewsContainer.visibility = View.VISIBLE
+                            }
+                        }
+                    }
+                }
+            },
+            nextFocusDownId = R.id.recycler_drawer,
+            nextFocusUpId = R.id.btn_settings
+        )
+        recyclerFavorites.adapter = favoritesAdapter
+
+        drawerAdapter = AppCardAdapter(
+            preferencesManager = preferencesManager,
+            onAppClick = { app -> discoveryManager.launchApp(app) },
+            onAppLongClick = { app, _ -> showAppContextMenu(app) },
+            nextFocusUpId = R.id.recycler_favorites
+        )
+        recyclerDrawer.adapter = drawerAdapter
+    }
+
+    private fun setupListeners() {
+        btnSettings.setOnClickListener {
+            showSettingsDialog()
+        }
+
+        // Informational only: News ticker is strictly non-focusable & non-clickable
+        widgetNewsContainer.isFocusable = false
+        widgetNewsContainer.isClickable = false
+    }
+
+    private fun registerPackageReceiver() {
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_ADDED)
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_REPLACED)
+            addDataScheme("package")
+        }
+        registerReceiver(packageChangeReceiver, filter)
+    }
+
+    private fun loadAppsAsync() {
+        progressLoader.visibility = View.VISIBLE
+        backgroundExecutor.execute {
+            val allApps = discoveryManager.loadInstalledApps(includeHidden = false)
+            val favoritePackageNames = preferencesManager.getFavorites()
+
+            val explicitFavorites = favoritePackageNames.mapNotNull { pkg ->
+                allApps.find { it.packageName == pkg }
+            }
+
+            val dockApps = mutableListOf<AppModel>()
+            dockApps.addAll(explicitFavorites.take(DOCK_MAX_CAPACITY))
+
+            if (dockApps.size < DOCK_MAX_CAPACITY) {
+                val remainingSlots = DOCK_MAX_CAPACITY - dockApps.size
+                val fillers = allApps.filter { app ->
+                    !dockApps.any { it.packageName == app.packageName }
+                }.take(remainingSlots)
+                dockApps.addAll(fillers)
+            }
+
+            val drawerApps = allApps.filter { app ->
+                !dockApps.any { it.packageName == app.packageName }
+            }
+
+            mainHandler.post {
+                favoritesAdapter.setApps(dockApps)
+                drawerAdapter.setApps(drawerApps)
+                drawerContainer.visibility = if (drawerApps.isNotEmpty()) View.VISIBLE else View.GONE
+                progressLoader.visibility = View.GONE
+
+                if (recyclerFavorites.childCount > 0) {
+                    recyclerFavorites.getChildAt(0)?.requestFocus()
+                } else {
+                    recyclerFavorites.post {
+                        recyclerFavorites.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun refreshWidgetsAsync() {
+        // 1. RAM widget
+        val ramEnabled = preferencesManager.isRamWidgetEnabled()
+        widgetRamContainer.visibility = if (ramEnabled) View.VISIBLE else View.GONE
+        if (ramEnabled) {
+            val ramText = widgetManager.formatRamFreeString()
+            textWidgetRam.text = ramText
+        }
+
+        // 2. Network widget
+        val networkEnabled = preferencesManager.isNetworkWidgetEnabled()
+        widgetNetworkContainer.visibility = if (networkEnabled) View.VISIBLE else View.GONE
+        if (networkEnabled) {
+            val (iconRes, netLabel) = when (widgetManager.getNetworkStatus()) {
+                WidgetManager.NetworkType.ETHERNET -> Pair(R.drawable.ic_wifi, "Ethernet")
+                WidgetManager.NetworkType.WIFI -> Pair(R.drawable.ic_wifi, "Wi-Fi 6")
+                WidgetManager.NetworkType.NONE -> Pair(R.drawable.ic_wifi, "Non connecté")
+            }
+            iconWidgetNetwork.setImageResource(iconRes)
+            textWidgetNetwork.text = netLabel
+        }
+
+        // 3. Weather widget
+        val weatherEnabled = preferencesManager.isWeatherWidgetEnabled()
+        widgetWeatherContainer.visibility = if (weatherEnabled) View.VISIBLE else View.GONE
+
+        // 4. Center ticker: Google News or Sports Scoreboard
+        val sportsEnabled = preferencesManager.isSportsWidgetEnabled()
+        val newsEnabled = preferencesManager.isNewsWidgetEnabled()
+        widgetNewsContainer.visibility = if (sportsEnabled || newsEnabled) View.VISIBLE else View.GONE
+
+        if (weatherEnabled || newsEnabled || sportsEnabled) {
+            backgroundExecutor.execute {
+                var weatherString: String? = null
+                if (weatherEnabled) {
+                    val isAuto = preferencesManager.isWeatherAutoLocation()
+                    val lat: Double
+                    val lon: Double
+                    val cityName: String
+
+                    if (isAuto) {
+                        val geo = weatherManager.resolveIpLocation()
+                        if (geo != null) {
+                            lat = geo.latitude
+                            lon = geo.longitude
+                            cityName = geo.cityName
+                            preferencesManager.setWeatherCoordinates(lat, lon)
+                            preferencesManager.setWeatherCity(cityName)
+                        } else {
+                            lat = preferencesManager.getWeatherLatitude()
+                            lon = preferencesManager.getWeatherLongitude()
+                            cityName = preferencesManager.getWeatherCity()
+                        }
+                    } else {
+                        val city = preferencesManager.getWeatherCity()
+                        val geo = weatherManager.geocodeCity(city)
+                        if (geo != null) {
+                            lat = geo.latitude
+                            lon = geo.longitude
+                            cityName = geo.cityName
+                            preferencesManager.setWeatherCoordinates(lat, lon)
+                        } else {
+                            lat = preferencesManager.getWeatherLatitude()
+                            lon = preferencesManager.getWeatherLongitude()
+                            cityName = city
+                        }
+                    }
+                    weatherString = weatherManager.getWeatherText(lat, lon, cityName)
+                }
+
+                var centerText: String? = null
+                if (sportsEnabled) {
+                    centerText = sportsManager.getSportsTickerText(
+                        sport = preferencesManager.getSportsType(),
+                        favoriteTeam = preferencesManager.getSportsFavoriteTeam()
+                    )
+                } else if (newsEnabled) {
+                    val topics = preferencesManager.getNewsTopics()
+                    val sources = preferencesManager.getNewsSources()
+                    val customKeyword = preferencesManager.getNewsCustomKeyword()
+                    val legacyTopic = preferencesManager.getNewsTopic()
+                    centerText = newsManager.getNewsTickerText(topics, sources, customKeyword, legacyTopic)
+                }
+
+                mainHandler.post {
+                    if (weatherEnabled && weatherString != null) {
+                        textWidgetWeather.text = weatherString
+                    }
+                    if (centerText != null) {
+                        textWidgetNews.text = centerText
+                        textWidgetNews.isSelected = true
+                    }
+                }
+            }
+        }
+    }
+
+    private fun refreshWallpaperAsync() {
+        val isHighContrast = preferencesManager.isHighContrast()
+        if (isHighContrast) {
+            imageWallpaper.visibility = View.GONE
+            viewScrim.visibility = View.GONE
+            mainRoot.setBackgroundColor(Color.BLACK)
+            return
+        }
+
+        imageWallpaper.visibility = View.VISIBLE
+        viewScrim.visibility = View.VISIBLE
+
+        val source = preferencesManager.getWallpaperSource()
+
+        when (source) {
+            PreferencesManager.WALLPAPER_BING -> {
+                backgroundExecutor.execute {
+                    var bitmap = wallpaperManager.getCachedWallpaperBitmap()
+                    if (bitmap == null) {
+                        val downloaded = wallpaperManager.refreshWallpaperFromBing()
+                        if (downloaded) {
+                            bitmap = wallpaperManager.getCachedWallpaperBitmap()
+                        }
+                    }
+                    mainHandler.post {
+                        if (bitmap != null) {
+                            imageWallpaper.setImageBitmap(bitmap)
+                        } else {
+                            imageWallpaper.setImageResource(R.drawable.bg_default_scenic)
+                        }
+                    }
+                }
+            }
+            PreferencesManager.WALLPAPER_STORAGE -> {
+                backgroundExecutor.execute {
+                    val path = preferencesManager.getWallpaperStoragePath()
+                    val bitmap = wallpaperManager.getBitmapFromStorage(path)
+                    mainHandler.post {
+                        if (bitmap != null) {
+                            imageWallpaper.setImageBitmap(bitmap)
+                        } else {
+                            imageWallpaper.setImageResource(R.drawable.bg_default_scenic)
+                        }
+                    }
+                }
+            }
+            PreferencesManager.WALLPAPER_GOOGLE_PHOTOS -> {
+                backgroundExecutor.execute {
+                    val url = preferencesManager.getGooglePhotosUrl()
+                    val bitmap = wallpaperManager.getBitmapFromUrl(url)
+                    mainHandler.post {
+                        if (bitmap != null) {
+                            imageWallpaper.setImageBitmap(bitmap)
+                        } else {
+                            imageWallpaper.setImageResource(R.drawable.bg_default_scenic)
+                        }
+                    }
+                }
+            }
+            else -> {
+                imageWallpaper.setImageResource(R.drawable.bg_default_scenic)
+            }
+        }
+    }
+
+    private fun applyThemeAndPreferences() {
+        val isHighContrast = preferencesManager.isHighContrast()
+        if (isHighContrast) {
+            imageWallpaper.visibility = View.GONE
+            viewScrim.visibility = View.GONE
+            mainRoot.setBackgroundColor(Color.BLACK)
+            btnSettings.setBackgroundResource(R.drawable.focus_border_high_contrast)
+        } else {
+            imageWallpaper.visibility = View.VISIBLE
+            viewScrim.visibility = View.VISIBLE
+            btnSettings.setBackgroundResource(R.drawable.bg_capsule_pill_selector)
+        }
+    }
+
+    private fun showAppContextMenu(app: AppModel) {
+        val isFav = preferencesManager.isFavorite(app.packageName)
+        val favLabel = if (isFav) getString(R.string.action_favorite_remove) else getString(R.string.action_favorite_add)
+
+        val options = arrayOf(
+            favLabel,
+            getString(R.string.action_hide),
+            getString(R.string.action_app_info)
+        )
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle(app.label)
+            .setItems(options) { _: DialogInterface, which: Int ->
+                when (which) {
+                    0 -> {
+                        if (isFav) {
+                            preferencesManager.removeFavorite(app.packageName)
+                        } else {
+                            preferencesManager.addFavorite(app.packageName)
+                        }
+                        loadAppsAsync()
+                    }
+                    1 -> {
+                        preferencesManager.setAppHidden(app.packageName, true)
+                        loadAppsAsync()
+                    }
+                    2 -> {
+                        openAppDetails(app.packageName)
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showSettingsDialog() {
+        val categories = arrayOf(
+            "🎨 Apparence",
+            "🧩 Widgets",
+            "♿ Accessibilité & Système"
+        )
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle(R.string.settings_title)
+            .setItems(categories) { _: DialogInterface, which: Int ->
+                when (which) {
+                    0 -> showAppearanceSettingsDialog()
+                    1 -> showWidgetsSettingsDialog()
+                    2 -> showAccessibilityAndSystemDialog()
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showAppearanceSettingsDialog() {
+        val wpLabel = when (preferencesManager.getWallpaperSource()) {
+            PreferencesManager.WALLPAPER_BING -> "Bing Daily 4K"
+            PreferencesManager.WALLPAPER_STORAGE -> "Stockage local TV"
+            PreferencesManager.WALLPAPER_GOOGLE_PHOTOS -> "Google Photos"
+            else -> "Alpin 4K (Défaut)"
+        }
+        val drawerCol = "${preferencesManager.getDrawerColumns()} colonnes"
+        val shapeLabel = when (preferencesManager.getIconShape()) {
+            PreferencesManager.SHAPE_CIRCLE -> "Cercle"
+            PreferencesManager.SHAPE_ROUNDED_RECT -> "Rectangle arrondi"
+            else -> "Squircle (Apple TV)"
+        }
+        val scrollModeLabel = if (preferencesManager.getScrollMode() == PreferencesManager.SCROLL_MODE_SMOOTH) "Fluide continu" else "Saut de page"
+
+        val options = arrayOf(
+            "🖼 Fond d'écran ($wpLabel)",
+            "📐 Colonnes de la grille ($drawerCol)",
+            "📐 Forme des icônes ($shapeLabel)",
+            "↕️ Mode de défilement ($scrollModeLabel)"
+        )
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("🎨 Apparence")
+            .setItems(options) { _: DialogInterface, which: Int ->
+                when (which) {
+                    0 -> showWallpaperSourceDialog()
+                    1 -> showDrawerColumnsDialog()
+                    2 -> showIconShapeDialog()
+                    3 -> {
+                        val currentMode = preferencesManager.getScrollMode()
+                        val newMode = if (currentMode == PreferencesManager.SCROLL_MODE_SMOOTH) PreferencesManager.SCROLL_MODE_PAGE else PreferencesManager.SCROLL_MODE_SMOOTH
+                        preferencesManager.setScrollMode(newMode)
+                        showAppearanceSettingsDialog()
+                    }
+                }
+            }
+            .setNegativeButton("Retour") { _, _ -> showSettingsDialog() }
+            .show()
+    }
+
+    private fun showIconShapeDialog() {
+        val shapes = arrayOf("Squircle (Style Apple TV)", "Cercle", "Rectangle arrondi")
+        val shapeKeys = arrayOf(
+            PreferencesManager.SHAPE_SQUIRCLE,
+            PreferencesManager.SHAPE_CIRCLE,
+            PreferencesManager.SHAPE_ROUNDED_RECT
+        )
+        val currentShape = preferencesManager.getIconShape()
+        val currentIndex = shapeKeys.indexOf(currentShape).coerceAtLeast(0)
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Forme des Icônes")
+            .setSingleChoiceItems(shapes, currentIndex) { dialog, which ->
+                preferencesManager.setIconShape(shapeKeys[which])
+                favoritesAdapter.notifyDataSetChanged()
+                drawerAdapter.notifyDataSetChanged()
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showWidgetsSettingsDialog() {
+        val ramState = if (preferencesManager.isRamWidgetEnabled()) "Activé" else "Désactivé"
+        val netState = if (preferencesManager.isNetworkWidgetEnabled()) "Activé" else "Désactivé"
+        val weatherState = if (preferencesManager.isWeatherWidgetEnabled()) "Activé (${preferencesManager.getWeatherCity()})" else "Désactivé"
+        val newsState = if (preferencesManager.isNewsWidgetEnabled()) "Activé" else "Désactivé"
+        val sportsState = if (preferencesManager.isSportsWidgetEnabled()) "Activé (${preferencesManager.getSportsType()})" else "Désactivé"
+        val topShelfState = if (preferencesManager.isTopShelfEnabled()) "Activé" else "Désactivé"
+
+        val options = arrayOf(
+            "⚡ Widget RAM ($ramState)",
+            "📡 Widget Wi-Fi 6 ($netState)",
+            "☀️ Configuration Météo ($weatherState)",
+            "📰 Personnalisation Google News ($newsState)",
+            "🏆 Scores Sports en direct ($sportsState)",
+            "📺 Top Shelf Style Apple TV ($topShelfState)"
+        )
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("🧩 Widgets")
+            .setItems(options) { _: DialogInterface, which: Int ->
+                when (which) {
+                    0 -> {
+                        preferencesManager.setRamWidgetEnabled(!preferencesManager.isRamWidgetEnabled())
+                        refreshWidgetsAsync()
+                        showWidgetsSettingsDialog()
+                    }
+                    1 -> {
+                        preferencesManager.setNetworkWidgetEnabled(!preferencesManager.isNetworkWidgetEnabled())
+                        refreshWidgetsAsync()
+                        showWidgetsSettingsDialog()
+                    }
+                    2 -> showWeatherConfigDialog()
+                    3 -> showNewsPersonalizationDialog()
+                    4 -> showSportsConfigDialog()
+                    5 -> {
+                        preferencesManager.setTopShelfEnabled(!preferencesManager.isTopShelfEnabled())
+                        refreshWidgetsAsync()
+                        showWidgetsSettingsDialog()
+                    }
+                }
+            }
+            .setNegativeButton("Retour") { _, _ -> showSettingsDialog() }
+            .show()
+    }
+
+    private fun showAccessibilityAndSystemDialog() {
+        val contrastState = if (preferencesManager.isHighContrast()) "Activé (OLED)" else "Standard"
+        val soundState = if (preferencesManager.isAudioFeedbackEnabled()) "Activé" else "Désactivé"
+        val platformLabel = preferencesManager.getPlatformOverride()
+        val displayInfo = displayResolutionManager.getDisplayInfo()
+        val displaySummary = "${displayInfo.resolutionType.label} • ${displayInfo.refreshRateMode.nominalHz}Hz"
+
+        val options = arrayOf(
+            "👁️ Mode Contraste Élevé OLED ($contrastState)",
+            "🔊 Rétroaction Sonore D-Pad ($soundState)",
+            "🖥️ Résolution & Fréquence HDMI ($displaySummary)",
+            "📺 Plateforme TV ($platformLabel)",
+            "⚙️ Paramètres Système TV"
+        )
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("♿ Accessibilité & Système")
+            .setItems(options) { _: DialogInterface, which: Int ->
+                when (which) {
+                    0 -> {
+                        preferencesManager.setHighContrast(!preferencesManager.isHighContrast())
+                        applyThemeAndPreferences()
+                        favoritesAdapter.notifyDataSetChanged()
+                        drawerAdapter.notifyDataSetChanged()
+                        showAccessibilityAndSystemDialog()
+                    }
+                    1 -> {
+                        preferencesManager.setAudioFeedbackEnabled(!preferencesManager.isAudioFeedbackEnabled())
+                        showAccessibilityAndSystemDialog()
+                    }
+                    2 -> showDisplayInfoDialog()
+                    3 -> showPlatformDialog()
+                    4 -> startActivity(Intent(platformManager.getActivePlatform().settingsAction))
+                }
+            }
+            .setNegativeButton("Retour") { _, _ -> showSettingsDialog() }
+            .show()
+    }
+
+    private fun showDisplayInfoDialog() {
+        val info = displayResolutionManager.getDisplayInfo()
+        val safeInsets = displayResolutionManager.calculateSafeInsets()
+        val highHzStatus = if (info.isHighRefreshRate) "Supporté (120 Hz)" else "Standard (60 Hz)"
+
+        val message = """
+            • Résolution détectée : ${info.widthPixels} × ${info.heightPixels} (${info.resolutionType.label})
+            • Fréquence HDMI active : ${String.format(java.util.Locale.US, "%.1f", info.refreshRateHz)} Hz (${info.refreshRateMode.label})
+            • Mode Haute Fréquence : $highHzStatus
+            • Marges Anti-Overscan TV : ${safeInsets.left}px horizontales / ${safeInsets.top}px verticales (5%)
+            • VSync & Pacing : Fluidité 60/120 fps sans déchirement
+        """.trimIndent()
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Informations Affichage & HDMI")
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun showWallpaperSourceDialog() {
+        val sources = arrayOf(
+            "Photo par défaut (Lac Alpin 4K)",
+            "Bing (Image 4K Quotidienne)",
+            "Stockage TV (/sdcard/Pictures/wallpaper.jpg)",
+            "Google Photos (Lien web partagé)"
+        )
+        val currentIndex = when (preferencesManager.getWallpaperSource()) {
+            PreferencesManager.WALLPAPER_BING -> 1
+            PreferencesManager.WALLPAPER_STORAGE -> 2
+            PreferencesManager.WALLPAPER_GOOGLE_PHOTOS -> 3
+            else -> 0
+        }
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Source du Fond d'écran")
+            .setSingleChoiceItems(sources, currentIndex) { dialog, which ->
+                val newSource = when (which) {
+                    1 -> PreferencesManager.WALLPAPER_BING
+                    2 -> PreferencesManager.WALLPAPER_STORAGE
+                    3 -> PreferencesManager.WALLPAPER_GOOGLE_PHOTOS
+                    else -> PreferencesManager.WALLPAPER_DEFAULT
+                }
+                preferencesManager.setWallpaperSource(newSource)
+                dialog.dismiss()
+                refreshWallpaperAsync()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showWeatherConfigDialog() {
+        val options = arrayOf(
+            "Détection automatique par IP",
+            "Montréal (Canada)",
+            "Paris (France)",
+            "Québec (Canada)",
+            "Lyon (France)",
+            "Saisie manuelle d'une ville..."
+        )
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Configuration Météo")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        preferencesManager.setWeatherAutoLocation(true)
+                        preferencesManager.setWeatherWidgetEnabled(true)
+                        refreshWidgetsAsync()
+                    }
+                    1 -> setManualCity("Montréal")
+                    2 -> setManualCity("Paris")
+                    3 -> setManualCity("Québec")
+                    4 -> setManualCity("Lyon")
+                    5 -> promptCityInput()
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun setManualCity(city: String) {
+        preferencesManager.setWeatherAutoLocation(false)
+        preferencesManager.setWeatherCity(city)
+        preferencesManager.setWeatherWidgetEnabled(true)
+        refreshWidgetsAsync()
+    }
+
+    private fun promptCityInput() {
+        val input = EditText(this)
+        input.hint = "Nom de la ville (ex: Marseille, Bruxelles)"
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Entrez une ville")
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val text = input.text.toString().trim()
+                if (text.isNotBlank()) {
+                    setManualCity(text)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showNewsPersonalizationDialog() {
+        val topics = arrayOf("Technologie", "Cinéma & Séries", "Sports", "Sciences & Espace", "Monde", "Économie")
+        val topicKeys = arrayOf(
+            PreferencesManager.TOPIC_TECHNOLOGY,
+            PreferencesManager.TOPIC_ENTERTAINMENT,
+            PreferencesManager.TOPIC_SPORTS,
+            PreferencesManager.TOPIC_SCIENCE,
+            PreferencesManager.TOPIC_WORLD,
+            PreferencesManager.TOPIC_BUSINESS
+        )
+        val currentTopics = preferencesManager.getNewsTopics().toMutableSet()
+        val checkedTopics = BooleanArray(topics.size) { i -> currentTopics.contains(topicKeys[i]) }
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Google News : Thématiques")
+            .setMultiChoiceItems(topics, checkedTopics) { _, which, isChecked ->
+                if (isChecked) currentTopics.add(topicKeys[which]) else currentTopics.remove(topicKeys[which])
+            }
+            .setPositiveButton("Sources...") { _, _ ->
+                preferencesManager.setNewsTopics(currentTopics)
+                preferencesManager.setNewsWidgetEnabled(true)
+                showNewsSourcesDialog()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showNewsSourcesDialog() {
+        val sources = PreferencesManager.PREDEFINED_NEWS_SOURCES.toTypedArray()
+        val currentSources = preferencesManager.getNewsSources().toMutableSet()
+        val checkedSources = BooleanArray(sources.size) { i -> currentSources.contains(sources[i]) }
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Google News : Journaux & Sources")
+            .setMultiChoiceItems(sources, checkedSources) { _, which, isChecked ->
+                if (isChecked) currentSources.add(sources[which]) else currentSources.remove(sources[which])
+            }
+            .setPositiveButton("Valider") { _, _ ->
+                preferencesManager.setNewsSources(currentSources)
+                refreshWidgetsAsync()
+            }
+            .setNeutralButton("Mot-clé...") { _, _ ->
+                preferencesManager.setNewsSources(currentSources)
+                promptNewsKeywordInput()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun promptNewsKeywordInput() {
+        val input = EditText(this)
+        input.hint = "Mot-clé (ex: Intelligence Artificielle, Formule 1)"
+        input.setText(preferencesManager.getNewsCustomKeyword())
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Mot-clé Google News personnalisé")
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                preferencesManager.setNewsCustomKeyword(input.text.toString().trim())
+                refreshWidgetsAsync()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showSportsConfigDialog() {
+        val sports = arrayOf("🏒 Hockey (LNH/NHL)", "🏀 Basketball (NBA)", "🏈 Football (NFL)", "⚽ Soccer (Europe/MLS)", "⚾ Baseball (MLB)")
+        val sportKeys = arrayOf(
+            SportsManager.SPORT_NHL,
+            SportsManager.SPORT_NBA,
+            SportsManager.SPORT_NFL,
+            SportsManager.SPORT_SOCCER,
+            SportsManager.SPORT_MLB
+        )
+        val currentSport = preferencesManager.getSportsType()
+        val currentIndex = sportKeys.indexOf(currentSport).coerceAtLeast(0)
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Widget Sports en direct : Choix du Sport")
+            .setSingleChoiceItems(sports, currentIndex) { dialog, which ->
+                preferencesManager.setSportsType(sportKeys[which])
+                preferencesManager.setSportsWidgetEnabled(true)
+                dialog.dismiss()
+                showSportsTeamDialog()
+            }
+            .setNeutralButton(if (preferencesManager.isSportsWidgetEnabled()) "Désactiver" else "Activer") { _, _ ->
+                preferencesManager.setSportsWidgetEnabled(!preferencesManager.isSportsWidgetEnabled())
+                refreshWidgetsAsync()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showSportsTeamDialog() {
+        val input = EditText(this)
+        input.hint = "Équipe favorite (ex: Canadiens, Lakers, Real Madrid)"
+        input.setText(preferencesManager.getSportsFavoriteTeam())
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Équipe Favorite en Priorité")
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                preferencesManager.setSportsFavoriteTeam(input.text.toString().trim())
+                refreshWidgetsAsync()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showPlatformDialog() {
+        val platforms = arrayOf("Auto (Détection matérielle)", "Google TV", "Amazon Fire TV")
+        val platformKeys = arrayOf(
+            PlatformManager.PLATFORM_AUTO,
+            PlatformManager.PLATFORM_GOOGLE_TV,
+            PlatformManager.PLATFORM_FIRE_TV
+        )
+        val current = preferencesManager.getPlatformOverride()
+        val currentIndex = platformKeys.indexOf(current).coerceAtLeast(0)
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Plateforme TV")
+            .setSingleChoiceItems(platforms, currentIndex) { dialog, which ->
+                preferencesManager.setPlatformOverride(platformKeys[which])
+                platformManager = PlatformManager(platformKeys[which])
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showDrawerColumnsDialog() {
+        val options = arrayOf("4 colonnes", "5 colonnes (Aligné avec le Dock)", "6 colonnes")
+        val values = intArrayOf(4, 5, 6)
+        val current = preferencesManager.getDrawerColumns()
+        val currentIndex = values.indexOf(current).coerceAtLeast(1)
+
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Nombre de colonnes du tiroir")
+            .setSingleChoiceItems(options, currentIndex) { dialog, which ->
+                val selected = values[which]
+                preferencesManager.setDrawerColumns(selected)
+                (recyclerDrawer.layoutManager as? GridLayoutManager)?.spanCount = selected
+                drawerAdapter.notifyDataSetChanged()
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun openAppDetails(packageName: String) {
+        try {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+            }
+            startActivity(intent)
+        } catch (_: Exception) {
+        }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (scrollContainer.scrollY > 40) {
+                scrollContainer.smoothScrollTo(0, 0)
+                recyclerFavorites.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                return true
+            }
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+}

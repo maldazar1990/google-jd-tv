@@ -3,22 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_root"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:clickable="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:gravity="center_horizontal"
+    android:gravity="center"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:paddingStart="8dp"
+    android:paddingTop="6dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="6dp">
 
-    <!-- Conteneur Carte Icône -->
+    <!-- Widescreen Squircle Card Frame (152dp x 94dp) -->
     <FrameLayout
         android:id="@+id/card_container"
-        android:layout_width="match_parent"
-        android:layout_height="110dp"
+        android:layout_width="152dp"
+        android:layout_height="94dp"
         android:clipChildren="false"
         android:clipToPadding="false">
 
@@ -27,53 +30,54 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:cardBackgroundColor="@color/card_bg_default"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp"
-            app:cardMaxElevation="8dp">
+            app:cardCornerRadius="18dp"
+            app:cardElevation="3dp"
+            app:cardMaxElevation="10dp"
+            app:cardPreventCornerOverlap="false">
 
             <ImageView
                 android:id="@+id/img_app_icon"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="@null"
-                android:padding="18dp"
+                android:padding="8dp"
                 android:scaleType="fitCenter"
                 tools:src="@drawable/ic_app_placeholder" />
 
         </androidx.cardview.widget.CardView>
 
-        <!-- Bordure de Focus (Glow Apple TV / High Contrast) -->
+        <!-- Focus Border (Apple TV Glowing Widescreen Squircle) -->
         <View
             android:id="@+id/view_focus_border"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/focus_border_normal"
+            android:background="@drawable/focus_border_apple"
             android:visibility="invisible" />
 
-        <!-- Badge Étoile Favori -->
+        <!-- Star Badge for Favorites -->
         <ImageView
             android:id="@+id/badge_favorite"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_gravity="top|end"
-            android:layout_margin="8dp"
+            android:layout_margin="6dp"
             android:src="@android:drawable/btn_star_big_on"
             android:visibility="gone"
-            app:tint="@color/focus_border_high_contrast" />
+            app:tint="#FFD700" />
     </FrameLayout>
 
-    <!-- Titre de l'application -->
+    <!-- App Title (Hidden by default, used for accessibility TalkBack) -->
     <TextView
         android:id="@+id/text_app_title"
-        android:layout_width="match_parent"
+        android:layout_width="152dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:gravity="center"
         android:lines="1"
         android:textColor="@color/text_primary"
-        android:textSize="13sp"
-        android:fontFamily="sans-serif-medium"
-        tools:text="Netflix" />
+        android:textSize="11sp"
+        android:visibility="gone"
+        tools:text="YouTube" />
 
 </LinearLayout>
