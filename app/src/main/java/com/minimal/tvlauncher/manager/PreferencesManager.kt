@@ -62,6 +62,7 @@ class PreferencesManager @JvmOverloads constructor(
         val VALID_WALLPAPER_SOURCES = setOf(WALLPAPER_DEFAULT, WALLPAPER_BING, WALLPAPER_STORAGE, WALLPAPER_GOOGLE_PHOTOS)
         const val DEFAULT_WALLPAPER_SOURCE = WALLPAPER_DEFAULT
         const val DEFAULT_WALLPAPER_STORAGE_PATH = "/sdcard/Pictures/wallpaper.jpg"
+        const val SCENIC_WALLPAPER_RES_NAME = "bg_default_scenic"
 
         // Extended Weather Keys & Defaults
         const val PREF_WEATHER_AUTO_LOCATION = "pref_weather_auto_location"
@@ -417,10 +418,41 @@ class PreferencesManager @JvmOverloads constructor(
     override fun isBingWallpaperEnabled(): Boolean {
         return try {
             val source = getWallpaperSource()
-            source == WALLPAPER_BING || prefs.getBoolean(PREF_BING_WALLPAPER, DEFAULT_BING_WALLPAPER)
+            if (source == WALLPAPER_DEFAULT) {
+                false
+            } else {
+                source == WALLPAPER_BING || prefs.getBoolean(PREF_BING_WALLPAPER, DEFAULT_BING_WALLPAPER)
+            }
         } catch (e: Exception) {
             DEFAULT_BING_WALLPAPER
         }
+    }
+
+    /**
+     * Checks if the default scenic alpine wallpaper (bg_default_scenic) is active and visible.
+     */
+    fun isDefaultScenicWallpaperActive(): Boolean {
+        return getWallpaperSource() == WALLPAPER_DEFAULT && !isHighContrast()
+    }
+
+    /**
+     * Ensures the scenic alpine wallpaper is active and visible by resetting wallpaper source to default
+     * and disabling high contrast mode if necessary.
+     */
+    fun ensureDefaultScenicWallpaper(sync: Boolean = isSyncMode): Boolean {
+        synchronized(lock) {
+            val sourceChanged = setWallpaperSource(WALLPAPER_DEFAULT, sync)
+            val contrastChanged = setHighContrast(false, sync)
+            val bingChanged = prefs.edit().putBoolean(PREF_BING_WALLPAPER, false).save(sync)
+            return sourceChanged && contrastChanged && bingChanged
+        }
+    }
+
+    /**
+     * Resets wallpaper source to default alpine scenic background.
+     */
+    fun resetWallpaperToDefault(sync: Boolean = isSyncMode): Boolean {
+        return setWallpaperSource(WALLPAPER_DEFAULT, sync)
     }
 
     override fun setBingWallpaperEnabled(enabled: Boolean) {

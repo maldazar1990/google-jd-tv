@@ -49,6 +49,9 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+            all {
+                it.maxParallelForks = 1
+            }
         }
     }
 }

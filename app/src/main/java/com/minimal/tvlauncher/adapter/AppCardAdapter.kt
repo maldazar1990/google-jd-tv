@@ -1,6 +1,7 @@
 package com.minimal.tvlauncher.adapter
 
 import android.graphics.Color
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.SoundEffectConstants
 import android.view.View
@@ -28,7 +29,8 @@ class AppCardAdapter(
     private val onAppLongClick: (AppModel, View) -> Unit,
     private val onAppFocus: ((AppModel, Boolean) -> Unit)? = null,
     private val nextFocusDownId: Int = View.NO_ID,
-    private val nextFocusUpId: Int = View.NO_ID
+    private val nextFocusUpId: Int = View.NO_ID,
+    private val onDpadKeyDown: ((position: Int, keyCode: Int) -> Boolean)? = null
 ) : RecyclerView.Adapter<AppCardAdapter.AppViewHolder>() {
 
     private val apps = mutableListOf<AppModel>()
@@ -65,7 +67,7 @@ class AppCardAdapter(
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
         val app = apps[position]
-        holder.bind(app, preferencesManager, onAppClick, onAppLongClick, onAppFocus, nextFocusDownId, nextFocusUpId)
+        holder.bind(app, preferencesManager, onAppClick, onAppLongClick, onAppFocus, nextFocusDownId, nextFocusUpId, onDpadKeyDown)
     }
 
     class AppViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -84,7 +86,8 @@ class AppCardAdapter(
             onLongClick: (AppModel, View) -> Unit,
             onFocus: ((AppModel, Boolean) -> Unit)?,
             focusDownId: Int = View.NO_ID,
-            focusUpId: Int = View.NO_ID
+            focusUpId: Int = View.NO_ID,
+            onDpadKeyDown: ((position: Int, keyCode: Int) -> Boolean)? = null
         ) {
             textAppTitle.text = app.label
             cardRoot.contentDescription = app.label
@@ -95,6 +98,22 @@ class AppCardAdapter(
             }
             if (focusUpId != View.NO_ID) {
                 cardRoot.nextFocusUpId = focusUpId
+            }
+
+            // D-Pad Interceptor for 2-Tier Navigation
+            cardRoot.setOnKeyListener { _, keyCode, event ->
+                if (event.action == KeyEvent.ACTION_DOWN) {
+                    val pos = when {
+                        bindingAdapterPosition != RecyclerView.NO_POSITION -> bindingAdapterPosition
+                        absoluteAdapterPosition != RecyclerView.NO_POSITION -> absoluteAdapterPosition
+                        layoutPosition != RecyclerView.NO_POSITION -> layoutPosition
+                        else -> 0
+                    }
+                    if (onDpadKeyDown?.invoke(pos, keyCode) == true) {
+                        return@setOnKeyListener true
+                    }
+                }
+                false
             }
 
             // Banner or Icon handling with fallback

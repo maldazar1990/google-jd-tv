@@ -44,7 +44,7 @@
         android:paddingEnd="44dp"
         android:paddingBottom="12dp">
 
-        <!-- Left: Clock and Date inline (Flex-like: weight=1, min 30% space, responsive) -->
+        <!-- Left: Clock and Date inline -->
         <LinearLayout
             android:id="@+id/layout_clock_date"
             android:layout_width="0dp"
@@ -78,7 +78,7 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
-        <!-- Right: Status Capsules (Flex-like wrap_content, shrink-safe) -->
+        <!-- Right: Status Capsules -->
         <LinearLayout
             android:id="@+id/layout_status_capsules"
             android:layout_width="wrap_content"
@@ -137,7 +137,7 @@
                     android:text="Wi-Fi 6" />
             </LinearLayout>
 
-            <!-- Capsule 3: Weather (Responsive with max width for long city names) -->
+            <!-- Capsule 3: Weather -->
             <LinearLayout
                 android:id="@+id/widget_weather_container"
                 android:layout_width="wrap_content"
@@ -170,21 +170,22 @@
                     android:text="21°C" />
             </LinearLayout>
 
-            <!-- Capsule 4: Settings Button -->
+            <!-- Capsule 4: Settings Button with tvOS Overshoot & Halo -->
             <FrameLayout
                 android:id="@+id/btn_settings"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="@drawable/bg_capsule_pill_selector"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_settings_pill_selector"
                 android:clickable="true"
                 android:contentDescription="@string/settings_title"
+                android:elevation="4dp"
                 android:focusable="true"
                 android:nextFocusDown="@id/recycler_favorites">
 
                 <ImageView
                     android:id="@+id/icon_settings"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_gravity="center"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_settings"
@@ -194,152 +195,125 @@
     </LinearLayout>
 
     <!-- ======================================================== -->
-    <!-- VERTICAL SCROLL CONTENT (Scrolls UNDER the sticky header) -->
+    <!-- TIER 1: AT REST / HOME SCREEN                            -->
+    <!-- Scenic Wallpaper + Centered News Ticker + Bottom Dock    -->
     <!-- ======================================================== -->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scroll_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+
+    <!-- CENTER: Google News RSS Ticker / Top Shelf Pill -->
+    <FrameLayout
+        android:id="@+id/widget_news_container"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="164dp"
+        android:background="@drawable/bg_capsule_pill"
+        android:clickable="false"
+        android:descendantFocusability="blocksDescendants"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:paddingStart="22dp"
+        android:paddingEnd="22dp">
+
+        <TextView
+            android:id="@+id/text_widget_news"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="false"
+            android:ellipsize="marquee"
+            android:fadingEdge="horizontal"
+            android:fadingEdgeLength="20dp"
+            android:focusable="false"
+            android:fontFamily="sans-serif-medium"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:maxWidth="820dp"
+            android:singleLine="true"
+            android:textColor="#F0FFFFFF"
+            android:textSize="14sp"
+            tools:text="Google News : Découverte majeure dans l'exploration spatiale..." />
+    </FrameLayout>
+
+    <!-- BOTTOM DOCK SHELF: Exactly 5 Widescreen Favorite Apps pinned at bottom -->
+    <FrameLayout
+        android:id="@+id/dock_shelf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/bg_tvos_dock"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:fillViewport="true"
-        android:overScrollMode="never"
-        android:paddingTop="76dp"
-        android:scrollbars="none">
+        android:elevation="10dp"
+        android:paddingStart="14dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="10dp">
 
-        <LinearLayout
-            android:id="@+id/scroll_content"
-            android:layout_width="match_parent"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_favorites"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:orientation="vertical">
+            android:descendantFocusability="afterDescendants"
+            android:focusable="false"
+            android:nextFocusDown="@id/recycler_drawer"
+            android:nextFocusUp="@id/btn_settings"
+            android:orientation="horizontal"
+            android:overScrollMode="never"
+            tools:listitem="@layout/item_app_card" />
 
-            <!-- ======================================================== -->
-            <!-- PAGE 1: Home Viewport (Centered News + Dock at bottom)   -->
-            <!-- ======================================================== -->
-            <RelativeLayout
-                android:id="@+id/home_screen_viewport"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:paddingStart="44dp"
-                android:paddingTop="20dp"
-                android:paddingEnd="44dp"
-                android:paddingBottom="24dp">
+    </FrameLayout>
 
-                <!-- CENTER: Google News RSS Ticker (STRICTLY NON-FOCUSABLE, purely informational) -->
-                <FrameLayout
-                    android:id="@+id/widget_news_container"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_above="@id/dock_shelf"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginBottom="24dp"
-                    android:background="@drawable/bg_capsule_pill"
-                    android:clickable="false"
-                    android:descendantFocusability="blocksDescendants"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:paddingStart="22dp"
-                    android:paddingEnd="22dp">
+    <!-- ======================================================== -->
+    <!-- TIER 2: ALL APPS DRAWER GRID                             -->
+    <!-- Hidden at rest (View.GONE), opens on DOWN arrow from dock-->
+    <!-- ======================================================== -->
+    <LinearLayout
+        android:id="@+id/drawer_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="80dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:elevation="14dp"
+        android:orientation="vertical"
+        android:paddingStart="44dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="44dp"
+        android:paddingBottom="36dp"
+        android:visibility="gone">
 
-                    <TextView
-                        android:id="@+id/text_widget_news"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:clickable="false"
-                        android:ellipsize="marquee"
-                        android:fadingEdge="horizontal"
-                        android:fadingEdgeLength="20dp"
-                        android:focusable="false"
-                        android:fontFamily="sans-serif-medium"
-                        android:marqueeRepeatLimit="marquee_forever"
-                        android:maxWidth="820dp"
-                        android:singleLine="true"
-                        android:textColor="#F0FFFFFF"
-                        android:textSize="14sp"
-                        tools:text="Google News : Découverte majeure dans l'exploration spatiale..." />
-                </FrameLayout>
+        <TextView
+            android:id="@+id/text_drawer_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Toutes les applications"
+            android:textColor="#E0FFFFFF"
+            android:textSize="17sp" />
 
-                <!-- BOTTOM DOCK SHELF: Exactly 5 Widescreen Favorite Apps -->
-                <FrameLayout
-                    android:id="@+id/dock_shelf"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:background="@drawable/bg_tvos_dock"
-                    android:clipChildren="false"
-                    android:clipToPadding="false"
-                    android:paddingStart="14dp"
-                    android:paddingTop="10dp"
-                    android:paddingEnd="14dp"
-                    android:paddingBottom="10dp">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_drawer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:descendantFocusability="afterDescendants"
+            android:focusable="false"
+            android:nextFocusUp="@id/recycler_favorites"
+            android:overScrollMode="never"
+            tools:listitem="@layout/item_app_card" />
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recycler_favorites"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:clipChildren="false"
-                        android:clipToPadding="false"
-                        android:descendantFocusability="afterDescendants"
-                        android:focusable="false"
-                        android:nextFocusDown="@id/recycler_drawer"
-                        android:nextFocusUp="@id/btn_settings"
-                        android:orientation="horizontal"
-                        android:overScrollMode="never"
-                        tools:listitem="@layout/item_app_card" />
+    </LinearLayout>
 
-                </FrameLayout>
-
-            </RelativeLayout>
-
-            <!-- ======================================================== -->
-            <!-- PAGE 2: All Apps Drawer Grid (Revealed upon Scroll Down)  -->
-            <!-- ======================================================== -->
-            <LinearLayout
-                android:id="@+id/drawer_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:orientation="vertical"
-                android:paddingStart="44dp"
-                android:paddingTop="32dp"
-                android:paddingEnd="44dp"
-                android:paddingBottom="48dp">
-
-                <TextView
-                    android:id="@+id/text_drawer_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginBottom="12dp"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="Toutes les applications"
-                    android:textColor="#E0FFFFFF"
-                    android:textSize="17sp" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_drawer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clipChildren="false"
-                    android:clipToPadding="false"
-                    android:descendantFocusability="afterDescendants"
-                    android:focusable="false"
-                    android:nextFocusUp="@id/recycler_favorites"
-                    android:overScrollMode="never"
-                    tools:listitem="@layout/item_app_card" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </androidx.core.widget.NestedScrollView>
+    <!-- ======================================================== -->
+    <!-- TVOS CONTROL CENTER (Centre de Contrôle Apple TV)        -->
+    <!-- Lateral floating translucent rounded panel               -->
+    <!-- ======================================================== -->
+    <include layout="@layout/view_control_center" />
 
     <!-- Loader -->
     <ProgressBar
@@ -347,6 +321,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="center"
+        android:elevation="35dp"
         android:indeterminate="true"
         android:indeterminateTint="@color/focus_glow_apple"
         android:visibility="gone" />

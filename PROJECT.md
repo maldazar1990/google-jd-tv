@@ -176,21 +176,29 @@ c:\Users\jdgen\OneDrive\Documents\android tv apple tv\
 │       ├── main\
 │       │   ├── AndroidManifest.xml
 │       │   ├── java\com\minimal\tvlauncher\
+│       │   │   ├── config\
+│       │   │   │   └── AppConfig.kt
 │       │   │   ├── adapter\
-│       │   │   │   ├── AppGridAdapter.kt
-│       │   │   │   └── FavoritesAdapter.kt
+│       │   │   │   └── AppCardAdapter.kt
 │       │   │   ├── manager\
 │       │   │   │   ├── AppDiscoveryManager.kt
-│       │   │   │   ├── IAppDiscoveryManager.kt
+│       │   │   │   ├── BingWallpaperManager.kt
+│       │   │   │   ├── DisplayResolutionManager.kt
+│       │   │   │   ├── NewsManager.kt
 │       │   │   │   ├── PreferencesManager.kt
-│       │   │   │   └── IPreferencesManager.kt
+│       │   │   │   ├── SportsManager.kt
+│       │   │   │   ├── TopShelfManager.kt
+│       │   │   │   ├── WeatherManager.kt
+│       │   │   │   └── WidgetManager.kt
+│       │   │   ├── platform\
+│       │   │   │   ├── FireTvPlatformProvider.kt
+│       │   │   │   ├── GoogleTvPlatformProvider.kt
+│       │   │   │   ├── ITvPlatformProvider.kt
+│       │   │   │   ├── PlatformManager.kt
+│       │   │   │   └── TvPlatformType.kt
 │       │   │   ├── model\
 │       │   │   │   └── AppModel.kt
-│       │   │   └── ui\
-│       │   │       ├── MainActivity.kt
-│       │   │       ├── FocusAnimationEngine.kt
-│       │   │       ├── SettingsDialog.kt
-│       │   │       └── ContextMenuDialog.kt
+│       │   │   └── MainActivity.kt
 │       │   └── res\
 │       │       ├── drawable\ ...
 │       │       ├── layout\ ...

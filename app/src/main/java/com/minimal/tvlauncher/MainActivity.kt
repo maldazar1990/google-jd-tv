@@ -13,15 +13,19 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.KeyEvent
+import android.view.SoundEffectConstants
 import android.view.View
+import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.core.widget.NestedScrollView
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -62,15 +66,15 @@ class MainActivity : FragmentActivity() {
     private lateinit var mainRoot: FrameLayout
     private lateinit var imageWallpaper: ImageView
     private lateinit var viewScrim: View
-    private lateinit var scrollContainer: NestedScrollView
-    private lateinit var homeScreenViewport: RelativeLayout
 
+    private lateinit var dockShelf: FrameLayout
     private lateinit var recyclerFavorites: RecyclerView
     private lateinit var recyclerDrawer: RecyclerView
     private lateinit var drawerContainer: LinearLayout
     private lateinit var textDrawerTitle: TextView
     private lateinit var progressLoader: ProgressBar
     private lateinit var btnSettings: FrameLayout
+    private lateinit var iconSettings: ImageView
 
     // Status Widgets
     private lateinit var widgetRamContainer: LinearLayout
@@ -85,6 +89,24 @@ class MainActivity : FragmentActivity() {
     // News / Top Shelf / Sports Ticker
     private lateinit var widgetNewsContainer: FrameLayout
     private lateinit var textWidgetNews: TextView
+
+    // Control Center (Centre de Contrôle tvOS)
+    private lateinit var controlCenterContainer: FrameLayout
+    private lateinit var controlCenterPanel: LinearLayout
+    private lateinit var btnCcPower: View
+    private lateinit var btnCcWifi: View
+    private lateinit var textCcWifiStatus: TextView
+    private lateinit var btnCcAudio: View
+    private lateinit var btnCcGamepad: View
+    private lateinit var btnCcDisplay: View
+    private lateinit var textCcDisplayStatus: TextView
+    private lateinit var btnCcAllSettings: View
+    private lateinit var btnCcAccessibility: View
+    private lateinit var btnCcClose: View
+
+    private var isDrawerOpen = false
+    private var isControlCenterOpen = false
+    private var lastDockFocusPosition = 0
 
     private lateinit var favoritesAdapter: AppCardAdapter
     private lateinit var drawerAdapter: AppCardAdapter
@@ -116,6 +138,7 @@ class MainActivity : FragmentActivity() {
         initViews()
         setupRecyclerViews()
         setupListeners()
+        setupControlCenter()
         registerPackageReceiver()
     }
 
@@ -155,21 +178,15 @@ class MainActivity : FragmentActivity() {
         mainRoot = findViewById(R.id.main_root)
         imageWallpaper = findViewById(R.id.image_wallpaper)
         viewScrim = findViewById(R.id.view_scrim)
-        scrollContainer = findViewById(R.id.scroll_container)
-        homeScreenViewport = findViewById(R.id.home_screen_viewport)
 
-        val screenHeight = resources.displayMetrics.heightPixels
-        homeScreenViewport.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            screenHeight
-        )
-
+        dockShelf = findViewById(R.id.dock_shelf)
         recyclerFavorites = findViewById(R.id.recycler_favorites)
         recyclerDrawer = findViewById(R.id.recycler_drawer)
         drawerContainer = findViewById(R.id.drawer_container)
         textDrawerTitle = findViewById(R.id.text_drawer_title)
         progressLoader = findViewById(R.id.progress_loader)
         btnSettings = findViewById(R.id.btn_settings)
+        iconSettings = findViewById(R.id.icon_settings)
 
         widgetRamContainer = findViewById(R.id.widget_ram_container)
         textWidgetRam = findViewById(R.id.text_widget_ram)
@@ -182,8 +199,21 @@ class MainActivity : FragmentActivity() {
 
         widgetNewsContainer = findViewById(R.id.widget_news_container)
         textWidgetNews = findViewById(R.id.text_widget_news)
-
         textWidgetNews.isSelected = true
+
+        // Control Center
+        controlCenterContainer = findViewById(R.id.control_center_container)
+        controlCenterPanel = findViewById(R.id.control_center_panel)
+        btnCcPower = findViewById(R.id.btn_cc_power)
+        btnCcWifi = findViewById(R.id.btn_cc_wifi)
+        textCcWifiStatus = findViewById(R.id.text_cc_wifi_status)
+        btnCcAudio = findViewById(R.id.btn_cc_audio)
+        btnCcGamepad = findViewById(R.id.btn_cc_gamepad)
+        btnCcDisplay = findViewById(R.id.btn_cc_display)
+        textCcDisplayStatus = findViewById(R.id.text_cc_display_status)
+        btnCcAllSettings = findViewById(R.id.btn_cc_all_settings)
+        btnCcAccessibility = findViewById(R.id.btn_cc_accessibility)
+        btnCcClose = findViewById(R.id.btn_cc_close)
     }
 
     private fun setupRecyclerViews() {
@@ -197,6 +227,12 @@ class MainActivity : FragmentActivity() {
             onAppClick = { app -> discoveryManager.launchApp(app) },
             onAppLongClick = { app, _ -> showAppContextMenu(app) },
             onAppFocus = { app, hasFocus ->
+                if (hasFocus) {
+                    val pos = recyclerFavorites.getChildAdapterPosition(recyclerFavorites.findFocus() ?: return@AppCardAdapter)
+                    if (pos != RecyclerView.NO_POSITION) {
+                        lastDockFocusPosition = pos
+                    }
+                }
                 // Top Shelf Preview on Dock hover
                 if (hasFocus && preferencesManager.isTopShelfEnabled()) {
                     backgroundExecutor.execute {
@@ -213,7 +249,21 @@ class MainActivity : FragmentActivity() {
                 }
             },
             nextFocusDownId = R.id.recycler_drawer,
-            nextFocusUpId = R.id.btn_settings
+            nextFocusUpId = R.id.btn_settings,
+            onDpadKeyDown = { position, keyCode ->
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        lastDockFocusPosition = position
+                        openDrawer()
+                        true
+                    }
+                    KeyEvent.KEYCODE_DPAD_UP -> {
+                        btnSettings.requestFocus()
+                        true
+                    }
+                    else -> false
+                }
+            }
         )
         recyclerFavorites.adapter = favoritesAdapter
 
@@ -221,19 +271,346 @@ class MainActivity : FragmentActivity() {
             preferencesManager = preferencesManager,
             onAppClick = { app -> discoveryManager.launchApp(app) },
             onAppLongClick = { app, _ -> showAppContextMenu(app) },
-            nextFocusUpId = R.id.recycler_favorites
+            nextFocusUpId = R.id.recycler_favorites,
+            onDpadKeyDown = { position, keyCode ->
+                if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    val cols = preferencesManager.getDrawerColumns()
+                    if (position < cols) {
+                        closeDrawer()
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            }
         )
         recyclerDrawer.adapter = drawerAdapter
     }
 
     private fun setupListeners() {
+        // Settings button animation and halo
+        btnSettings.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                if (preferencesManager.isAudioFeedbackEnabled()) {
+                    v.playSoundEffect(SoundEffectConstants.NAVIGATION_RIGHT)
+                }
+                v.animate()
+                    .scaleX(1.25f)
+                    .scaleY(1.25f)
+                    .setDuration(200)
+                    .setInterpolator(OvershootInterpolator(1.4f))
+                    .start()
+                v.elevation = 18f
+                iconSettings.setColorFilter(Color.parseColor("#121824"))
+            } else {
+                v.animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .setDuration(200)
+                    .setInterpolator(DecelerateInterpolator())
+                    .start()
+                v.elevation = 4f
+                iconSettings.setColorFilter(Color.WHITE)
+            }
+        }
+
         btnSettings.setOnClickListener {
-            showSettingsDialog()
+            if (preferencesManager.isAudioFeedbackEnabled()) {
+                it.playSoundEffect(SoundEffectConstants.CLICK)
+            }
+            openControlCenter()
+        }
+
+        btnSettings.setOnKeyListener { _, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                focusDockItem()
+                true
+            } else {
+                false
+            }
         }
 
         // Informational only: News ticker is strictly non-focusable & non-clickable
         widgetNewsContainer.isFocusable = false
         widgetNewsContainer.isClickable = false
+    }
+
+    private fun setupControlCenter() {
+        // Scrim click closes Control Center
+        controlCenterContainer.setOnClickListener {
+            closeControlCenter()
+        }
+
+        val ccButtons = listOf(
+            btnCcPower,
+            btnCcWifi,
+            btnCcAudio,
+            btnCcGamepad,
+            btnCcDisplay,
+            btnCcAllSettings,
+            btnCcAccessibility,
+            btnCcClose
+        )
+
+        ccButtons.forEach { btn ->
+            btn.setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus) {
+                    if (preferencesManager.isAudioFeedbackEnabled()) {
+                        v.playSoundEffect(SoundEffectConstants.NAVIGATION_RIGHT)
+                    }
+                    v.animate().scaleX(1.04f).scaleY(1.04f).setDuration(160).start()
+                } else {
+                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(160).start()
+                }
+            }
+        }
+
+        // 1. Veille / Eteindre
+        btnCcPower.setOnClickListener {
+            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
+            AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                .setTitle("Alimentation TV")
+                .setMessage("Mettre votre téléviseur en veille ou accéder aux réglages d'énergie ?")
+                .setPositiveButton("Mettre en veille") { _, _ ->
+                    try {
+                        val powerIntent = Intent(Intent.ACTION_SCREEN_OFF)
+                        sendBroadcast(powerIntent)
+                    } catch (_: Exception) {
+                    }
+                }
+                .setNeutralButton("Paramètres Énergie") { _, _ ->
+                    try {
+                        startActivity(Intent(Settings.ACTION_SETTINGS))
+                    } catch (_: Exception) {
+                    }
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+
+        // 2. Wi-Fi
+        btnCcWifi.setOnClickListener {
+            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
+            try {
+                startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+            } catch (_: Exception) {
+                try {
+                    startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
+                } catch (_: Exception) {
+                    startActivity(Intent(Settings.ACTION_SETTINGS))
+                }
+            }
+        }
+
+        // 3. Audio & Son
+        btnCcAudio.setOnClickListener {
+            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
+            try {
+                startActivity(Intent(Settings.ACTION_SOUND_SETTINGS))
+            } catch (_: Exception) {
+                val current = preferencesManager.isAudioFeedbackEnabled()
+                preferencesManager.setAudioFeedbackEnabled(!current)
+                Toast.makeText(
+                    this,
+                    if (!current) "Rétroaction sonore D-Pad activée" else "Rétroaction sonore désactivée",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        // 4. Manettes & Bluetooth
+        btnCcGamepad.setOnClickListener {
+            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
+            try {
+                startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+            } catch (_: Exception) {
+                startActivity(Intent(Settings.ACTION_SETTINGS))
+            }
+        }
+
+        // 5. Affichage TV & Résolution 4K
+        btnCcDisplay.setOnClickListener {
+            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
+            closeControlCenter()
+            showDisplayInfoDialog()
+        }
+
+        // 6. Tous les Réglages Zen TV
+        btnCcAllSettings.setOnClickListener {
+            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
+            closeControlCenter()
+            showSettingsDialog()
+        }
+
+        // 7. Accessibilité
+        btnCcAccessibility.setOnClickListener {
+            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
+            closeControlCenter()
+            showAccessibilityAndSystemDialog()
+        }
+
+        // 8. Fermer
+        btnCcClose.setOnClickListener {
+            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
+            closeControlCenter()
+        }
+    }
+
+    private fun openControlCenter() {
+        isControlCenterOpen = true
+
+        // Verrouillage modal du focus à l'ouverture du Centre de Contrôle
+        recyclerFavorites.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+        recyclerDrawer.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+
+        controlCenterContainer.visibility = View.VISIBLE
+        controlCenterContainer.alpha = 0f
+        controlCenterPanel.translationX = 420f
+
+        val netStatus = textWidgetNetwork.text.toString()
+        textCcWifiStatus.text = if (netStatus.isNotBlank()) netStatus else "Connecté (Wi-Fi 6)"
+
+        val displayInfo = displayResolutionManager.getDisplayInfo()
+        val is4k = displayInfo.isTv4KHardwareCapable || displayInfo.resolutionType == DisplayResolutionManager.ResolutionType.UHD_4K
+        textCcDisplayStatus.text = if (is4k) {
+            "${displayInfo.resolutionType.label} • 4K actif"
+        } else {
+            "Cliquer pour activer la 4K"
+        }
+
+        controlCenterContainer.animate()
+            .alpha(1f)
+            .setDuration(200)
+            .start()
+
+        controlCenterPanel.animate()
+            .translationX(0f)
+            .setDuration(240)
+            .setInterpolator(DecelerateInterpolator(1.5f))
+            .withEndAction {
+                btnCcPower.requestFocus()
+            }
+            .start()
+
+        btnCcPower.requestFocus()
+    }
+
+    private fun closeControlCenter() {
+        if (!isControlCenterOpen) return
+        isControlCenterOpen = false
+
+        // Rétablir l'accessibilité du focus pour les listes d'applications
+        recyclerFavorites.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+        recyclerDrawer.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+
+        controlCenterContainer.animate()
+            .alpha(0f)
+            .setDuration(180)
+            .start()
+
+        controlCenterPanel.animate()
+            .translationX(420f)
+            .setDuration(200)
+            .setInterpolator(AccelerateInterpolator())
+            .withEndAction {
+                controlCenterContainer.visibility = View.GONE
+                btnSettings.requestFocus()
+            }
+            .start()
+
+        btnSettings.requestFocus()
+    }
+
+    private fun openDrawer() {
+        if (isDrawerOpen) return
+        isDrawerOpen = true
+        widgetNewsContainer.visibility = View.GONE
+
+        dockShelf.animate()
+            .translationY(140f)
+            .alpha(0f)
+            .setDuration(180)
+            .withEndAction {
+                dockShelf.visibility = View.GONE
+            }
+            .start()
+
+        drawerContainer.visibility = View.VISIBLE
+        drawerContainer.alpha = 0f
+        drawerContainer.translationY = 60f
+        drawerContainer.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(220)
+            .setInterpolator(DecelerateInterpolator())
+            .withEndAction {
+                focusDrawerFirstItem()
+            }
+            .start()
+
+        focusDrawerFirstItem()
+    }
+
+    private fun closeDrawer() {
+        if (!isDrawerOpen) return
+        isDrawerOpen = false
+
+        drawerContainer.animate()
+            .alpha(0f)
+            .translationY(60f)
+            .setDuration(180)
+            .withEndAction {
+                drawerContainer.visibility = View.GONE
+            }
+            .start()
+
+        dockShelf.visibility = View.VISIBLE
+        dockShelf.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(220)
+            .setInterpolator(DecelerateInterpolator())
+            .withEndAction {
+                focusDockItem()
+            }
+            .start()
+
+        if (preferencesManager.isNewsWidgetEnabled() || preferencesManager.isSportsWidgetEnabled()) {
+            widgetNewsContainer.visibility = View.VISIBLE
+        }
+
+        focusDockItem()
+    }
+
+    private fun focusDrawerFirstItem() {
+        recyclerDrawer.post {
+            val holder = recyclerDrawer.findViewHolderForAdapterPosition(0)
+            if (holder != null) {
+                holder.itemView.requestFocus()
+            } else {
+                recyclerDrawer.scrollToPosition(0)
+                recyclerDrawer.postDelayed({
+                    recyclerDrawer.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                }, 60)
+            }
+        }
+    }
+
+    private fun focusDockItem() {
+        recyclerFavorites.post {
+            val targetPos = lastDockFocusPosition.coerceIn(0, (favoritesAdapter.itemCount - 1).coerceAtLeast(0))
+            val holder = recyclerFavorites.findViewHolderForAdapterPosition(targetPos)
+            if (holder != null) {
+                holder.itemView.requestFocus()
+            } else {
+                recyclerFavorites.scrollToPosition(targetPos)
+                recyclerFavorites.postDelayed({
+                    recyclerFavorites.findViewHolderForAdapterPosition(targetPos)?.itemView?.requestFocus()
+                }, 60)
+            }
+        }
     }
 
     private fun registerPackageReceiver() {
@@ -274,15 +651,14 @@ class MainActivity : FragmentActivity() {
             mainHandler.post {
                 favoritesAdapter.setApps(dockApps)
                 drawerAdapter.setApps(drawerApps)
-                drawerContainer.visibility = if (drawerApps.isNotEmpty()) View.VISIBLE else View.GONE
                 progressLoader.visibility = View.GONE
 
-                if (recyclerFavorites.childCount > 0) {
-                    recyclerFavorites.getChildAt(0)?.requestFocus()
-                } else {
-                    recyclerFavorites.post {
-                        recyclerFavorites.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
-                    }
+                if (!isDrawerOpen) {
+                    drawerContainer.visibility = View.GONE
+                    dockShelf.visibility = View.VISIBLE
+                    dockShelf.translationY = 0f
+                    dockShelf.alpha = 1f
+                    focusDockItem()
                 }
             }
         }
@@ -308,6 +684,7 @@ class MainActivity : FragmentActivity() {
             }
             iconWidgetNetwork.setImageResource(iconRes)
             textWidgetNetwork.text = netLabel
+            textCcWifiStatus.text = netLabel
         }
 
         // 3. Weather widget
@@ -317,7 +694,7 @@ class MainActivity : FragmentActivity() {
         // 4. Center ticker: Google News or Sports Scoreboard
         val sportsEnabled = preferencesManager.isSportsWidgetEnabled()
         val newsEnabled = preferencesManager.isNewsWidgetEnabled()
-        widgetNewsContainer.visibility = if (sportsEnabled || newsEnabled) View.VISIBLE else View.GONE
+        widgetNewsContainer.visibility = if ((sportsEnabled || newsEnabled) && !isDrawerOpen) View.VISIBLE else View.GONE
 
         if (weatherEnabled || newsEnabled || sportsEnabled) {
             backgroundExecutor.execute {
@@ -460,7 +837,7 @@ class MainActivity : FragmentActivity() {
         } else {
             imageWallpaper.visibility = View.VISIBLE
             viewScrim.visibility = View.VISIBLE
-            btnSettings.setBackgroundResource(R.drawable.bg_capsule_pill_selector)
+            btnSettings.setBackgroundResource(R.drawable.bg_settings_pill_selector)
         }
     }
 
@@ -516,6 +893,9 @@ class MainActivity : FragmentActivity() {
                 }
             }
             .setNegativeButton(android.R.string.cancel, null)
+            .setOnDismissListener {
+                btnSettings.requestFocus()
+            }
             .show()
     }
 
@@ -932,11 +1312,15 @@ class MainActivity : FragmentActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (scrollContainer.scrollY > 40) {
-                scrollContainer.smoothScrollTo(0, 0)
-                recyclerFavorites.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+            if (isControlCenterOpen) {
+                closeControlCenter()
                 return true
             }
+            if (isDrawerOpen) {
+                closeDrawer()
+                return true
+            }
+            // Already on dock at home, stay on home launcher
             return true
         }
         return super.onKeyDown(keyCode, event)
