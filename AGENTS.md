@@ -99,5 +99,11 @@ Pour tout agent travaillant sur le dépôt :
      - Créer un tag Git annoté (`git tag -a vX.Y.Z -m "..."`).
      - Mettre à jour `CHANGELOG.md` et pousser les tags sur `origin`.
 
+5. **Clôture de Version & Documentation Complète (`DOCUMENTATION.md`)** :
+   - Dès que l'implémentation et les tests sont terminés avec succès :
+     - Un **sous-agent Documentation dédié** rédige un fichier complet `DOCUMENTATION.md` à la racine.
+     - Contenu obligatoire : architecture technique, guide utilisateur de la télécommande, réglages d'accessibilité, gestion des widgets/Bing, procédure de déploiement ADB et instructions pour Google Jules.
+
+
 
 
