@@ -81,4 +81,19 @@ class BluetoothDeviceManagerTest {
         assertThat(headset.type).isEqualTo(BluetoothDeviceManager.DeviceType.HEADSET)
         assertThat(headset.volumeLevel).isEqualTo(75)
     }
+
+    @Test
+    fun getConnectedRemoteOrGamepadInfo_returnsDefaultOrMock() {
+        val defaultInfo = bluetoothManager.getConnectedRemoteOrGamepadInfo()
+        assertThat(defaultInfo.name).isNotNull()
+
+        bluetoothManager.mockRemoteDeviceInfo = BluetoothDeviceManager.RemoteDeviceInfo(
+            name = "Télécommande",
+            batteryPercent = 18
+        )
+        val remoteInfo = bluetoothManager.getConnectedRemoteOrGamepadInfo()
+        assertThat(remoteInfo.name).isEqualTo("Télécommande")
+        assertThat(remoteInfo.batteryPercent).isEqualTo(18)
+        assertThat(remoteInfo.isLowBattery).isTrue()
+    }
 }

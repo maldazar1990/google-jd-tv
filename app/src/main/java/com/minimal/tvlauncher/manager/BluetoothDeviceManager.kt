@@ -24,6 +24,71 @@ class BluetoothDeviceManager(private val context: Context) {
         val volumeLevel: Int? = null // 0-100 or null
     )
 
+    data class RemoteDeviceInfo(
+        val name: String,
+        val batteryPercent: Int?,
+        val isLowBattery: Boolean = (batteryPercent != null && batteryPercent <= 20)
+    )
+
+    internal var mockRemoteDeviceInfo: RemoteDeviceInfo? = null
+
+    /**
+     * Finds active remote or gamepad and queries its battery capacity percentage.
+     */
+    fun getConnectedRemoteOrGamepadInfo(): RemoteDeviceInfo {
+        mockRemoteDeviceInfo?.let { return it }
+
+        // 1. Scan InputDevices
+        try {
+            val deviceIds = android.view.InputDevice.getDeviceIds()
+            for (id in deviceIds) {
+                val dev = android.view.InputDevice.getDevice(id) ?: continue
+                if (dev.isVirtual) continue
+
+                val sources = dev.sources
+                val isDpadOrGamepad = (sources and android.view.InputDevice.SOURCE_GAMEPAD) == android.view.InputDevice.SOURCE_GAMEPAD ||
+                                      (sources and android.view.InputDevice.SOURCE_JOYSTICK) == android.view.InputDevice.SOURCE_JOYSTICK ||
+                                      (sources and android.view.InputDevice.SOURCE_DPAD) == android.view.InputDevice.SOURCE_DPAD
+
+                if (isDpadOrGamepad) {
+                    var batteryPercent: Int? = null
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        try {
+                            val batteryState = dev.batteryState
+                            if (batteryState.isPresent) {
+                                val capacity = (batteryState.capacity * 100).toInt()
+                                if (capacity in 1..100) {
+                                    batteryPercent = capacity
+                                }
+                            }
+                        } catch (_: Exception) {}
+                    }
+
+                    val devName = dev.name ?: "Télécommande"
+                    val label = when {
+                        devName.contains("chromecast", ignoreCase = true) || devName.contains("remote", ignoreCase = true) -> "Télécommande"
+                        devName.contains("controller", ignoreCase = true) || devName.contains("gamepad", ignoreCase = true) -> devName
+                        else -> "Télécommande"
+                    }
+
+                    if (batteryPercent != null) {
+                        return RemoteDeviceInfo(name = label, batteryPercent = batteryPercent)
+                    }
+                }
+            }
+        } catch (_: Exception) {}
+
+        // 2. Scan connected Bluetooth devices
+        val btDevices = getConnectedDevicesWithBatteryOrVolume()
+        val controller = btDevices.firstOrNull { it.type == DeviceType.GAMEPAD } ?: btDevices.firstOrNull()
+        if (controller != null) {
+            val label = if (controller.name.contains("remote", ignoreCase = true)) "Télécommande" else controller.name
+            return RemoteDeviceInfo(name = label, batteryPercent = controller.batteryLevel)
+        }
+
+        return RemoteDeviceInfo(name = "Télécommande", batteryPercent = null)
+    }
+
     private val bluetoothManager: BluetoothManager? by lazy {
         try {
             context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager

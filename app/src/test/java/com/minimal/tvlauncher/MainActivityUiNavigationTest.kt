@@ -73,18 +73,14 @@ class MainActivityUiNavigationTest {
 
         val btnCcPower = activity.findViewById<View>(R.id.btn_cc_power)
         val btnCcWifi = activity.findViewById<View>(R.id.btn_cc_wifi)
-        val btnCcAudio = activity.findViewById<View>(R.id.btn_cc_audio)
-        val layoutCcVolumeSlider = activity.findViewById<View>(R.id.layout_cc_volume_slider)
-        val layoutCcConnectedBluetooth = activity.findViewById<View>(R.id.layout_cc_connected_bluetooth)
+        val btnCcRemoteBattery = activity.findViewById<View>(R.id.btn_cc_remote_battery)
         val btnCcAllSettings = activity.findViewById<View>(R.id.btn_cc_all_settings)
         val btnCcAccessibility = activity.findViewById<View>(R.id.btn_cc_accessibility)
         val btnCcClose = activity.findViewById<View>(R.id.btn_cc_close)
 
         assertThat(btnCcPower).isNotNull()
         assertThat(btnCcWifi).isNotNull()
-        assertThat(btnCcAudio).isNotNull()
-        assertThat(layoutCcVolumeSlider).isNotNull()
-        assertThat(layoutCcConnectedBluetooth).isNotNull()
+        assertThat(btnCcRemoteBattery).isNotNull()
         assertThat(btnCcAllSettings).isNotNull()
         assertThat(btnCcAccessibility).isNotNull()
         assertThat(btnCcClose).isNotNull()
@@ -92,13 +88,12 @@ class MainActivityUiNavigationTest {
         // Focus given to first button (btnCcPower)
         assertThat(btnCcPower.isFocused).isTrue()
 
-        // Check D-Pad chained navigation (without connected bluetooth device)
-        assertThat(btnCcPower.nextFocusDownId).isEqualTo(R.id.layout_cc_volume_slider)
+        // Check D-Pad chained navigation
+        assertThat(btnCcPower.nextFocusDownId).isEqualTo(R.id.btn_cc_all_settings)
         assertThat(btnCcPower.nextFocusRightId).isEqualTo(R.id.btn_cc_wifi)
-        assertThat(btnCcWifi.nextFocusDownId).isEqualTo(R.id.btn_cc_audio)
+        assertThat(btnCcWifi.nextFocusDownId).isEqualTo(R.id.btn_cc_remote_battery)
         assertThat(btnCcWifi.nextFocusLeftId).isEqualTo(R.id.btn_cc_power)
-        assertThat(btnCcAudio.nextFocusDownId).isEqualTo(R.id.layout_cc_volume_slider)
-        assertThat(layoutCcVolumeSlider.nextFocusDownId).isEqualTo(R.id.btn_cc_close)
+        assertThat(btnCcRemoteBattery.nextFocusDownId).isEqualTo(R.id.btn_cc_close)
         assertThat(btnCcAllSettings.nextFocusRightId).isEqualTo(R.id.btn_cc_accessibility)
         assertThat(btnCcAccessibility.nextFocusRightId).isEqualTo(R.id.btn_cc_close)
     }

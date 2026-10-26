@@ -489,8 +489,8 @@ class DisplayResolutionManager(private val context: Context) {
         val linkSpeedMbps: Int?
     ) {
         val formattedStatus: String
-            get() = if (linkSpeedMbps != null && linkSpeedMbps > 0) {
-                "$ssid ($linkSpeedMbps Mbps)"
+            get() = if (linkSpeedMbps != null && linkSpeedMbps > 0 && ssid != "Ethernet" && ssid != "Non connecté") {
+                "$ssid • $linkSpeedMbps Mbps"
             } else {
                 ssid
             }
@@ -501,6 +501,14 @@ class DisplayResolutionManager(private val context: Context) {
      */
     fun getWifiLinkSpeedMbps(ctx: Context = context): Int? {
         return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val cm = ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+                val network = cm?.activeNetwork
+                val caps = cm?.getNetworkCapabilities(network)
+                val wifiInfo = caps?.transportInfo as? android.net.wifi.WifiInfo
+                val speed = wifiInfo?.linkSpeed
+                if (speed != null && speed > 0 && speed != -1) return speed
+            }
             val wm = ctx.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
             @Suppress("DEPRECATION")
             val info = wm?.connectionInfo

@@ -99,16 +99,11 @@ class MainActivity : FragmentActivity() {
     private lateinit var btnCcPower: View
     private lateinit var btnCcWifi: View
     private lateinit var textCcWifiStatus: TextView
-    private lateinit var btnCcAudio: View
-    private lateinit var layoutCcVolumeSlider: LinearLayout
-    private lateinit var progressCcVolume: ProgressBar
-    private lateinit var textCcVolumePercent: TextView
-    private lateinit var textCcAudioSub: TextView
-    private lateinit var layoutCcConnectedBluetooth: LinearLayout
-    private lateinit var iconCcBtDevice: ImageView
-    private lateinit var textCcBtName: TextView
-    private lateinit var textCcBtDetails: TextView
-    private lateinit var badgeCcBtLowBattery: View
+    private lateinit var btnCcRemoteBattery: View
+    private lateinit var iconCcRemote: ImageView
+    private lateinit var textCcRemoteTitle: TextView
+    private lateinit var textCcRemoteStatus: TextView
+    private lateinit var badgeCcRemoteLowBattery: View
     private lateinit var btnCcAllSettings: View
     private lateinit var btnCcAccessibility: View
     private lateinit var btnCcClose: View
@@ -215,16 +210,11 @@ class MainActivity : FragmentActivity() {
         btnCcPower = findViewById(R.id.btn_cc_power)
         btnCcWifi = findViewById(R.id.btn_cc_wifi)
         textCcWifiStatus = findViewById(R.id.text_cc_wifi_status)
-        btnCcAudio = findViewById(R.id.btn_cc_audio)
-        layoutCcVolumeSlider = findViewById(R.id.layout_cc_volume_slider)
-        progressCcVolume = findViewById(R.id.progress_cc_volume)
-        textCcVolumePercent = findViewById(R.id.text_cc_volume_percent)
-        textCcAudioSub = findViewById(R.id.text_cc_audio_sub)
-        layoutCcConnectedBluetooth = findViewById(R.id.layout_cc_connected_bluetooth)
-        iconCcBtDevice = findViewById(R.id.icon_cc_bt_device)
-        textCcBtName = findViewById(R.id.text_cc_bt_name)
-        textCcBtDetails = findViewById(R.id.text_cc_bt_details)
-        badgeCcBtLowBattery = findViewById(R.id.badge_cc_bt_low_battery)
+        btnCcRemoteBattery = findViewById(R.id.btn_cc_remote_battery)
+        iconCcRemote = findViewById(R.id.icon_cc_remote)
+        textCcRemoteTitle = findViewById(R.id.text_cc_remote_title)
+        textCcRemoteStatus = findViewById(R.id.text_cc_remote_status)
+        badgeCcRemoteLowBattery = findViewById(R.id.badge_cc_remote_low_battery)
         btnCcAllSettings = findViewById(R.id.btn_cc_all_settings)
         btnCcAccessibility = findViewById(R.id.btn_cc_accessibility)
         btnCcClose = findViewById(R.id.btn_cc_close)
@@ -342,7 +332,6 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun setupControlCenter() {
-        // Scrim click closes Control Center
         controlCenterContainer.setOnClickListener {
             closeControlCenter()
         }
@@ -350,9 +339,7 @@ class MainActivity : FragmentActivity() {
         val ccButtons = listOf(
             btnCcPower,
             btnCcWifi,
-            btnCcAudio,
-            layoutCcVolumeSlider,
-            layoutCcConnectedBluetooth,
+            btnCcRemoteBattery,
             btnCcAllSettings,
             btnCcAccessibility,
             btnCcClose
@@ -383,37 +370,8 @@ class MainActivity : FragmentActivity() {
             displayResolutionManager.openWifiSettings(this)
         }
 
-        // 3. Audio & Son : Clic ouvrant directement les paramètres son Android TV
-        btnCcAudio.setOnClickListener {
-            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
-            displayResolutionManager.openSoundSettings(this)
-        }
-
-        // Range Slider interactif de volume : D-Pad GAUCHE / DROITE en direct
-        layoutCcVolumeSlider.setOnKeyListener { _, keyCode, event ->
-            if (event.action == KeyEvent.ACTION_DOWN) {
-                when (keyCode) {
-                    KeyEvent.KEYCODE_DPAD_LEFT -> {
-                        adjustMusicVolume(-1)
-                        true
-                    }
-                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                        adjustMusicVolume(1)
-                        true
-                    }
-                    else -> false
-                }
-            } else {
-                false
-            }
-        }
-        layoutCcVolumeSlider.setOnClickListener {
-            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
-            displayResolutionManager.openSoundSettings(this)
-        }
-
-        // Section Bluetooth
-        layoutCcConnectedBluetooth.setOnClickListener {
+        // 3. Télécommande / Manette : Réglages Télécommandes & Accessoires
+        btnCcRemoteBattery.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
             displayResolutionManager.openBluetoothSettings(this)
         }
@@ -439,40 +397,9 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private fun adjustMusicVolume(delta: Int) {
-        try {
-            val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
-            val current = am.getStreamVolume(AudioManager.STREAM_MUSIC)
-            val max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-            val min = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) am.getStreamMinVolume(AudioManager.STREAM_MUSIC) else 0
-            val target = (current + delta).coerceIn(min, max)
-            am.setStreamVolume(AudioManager.STREAM_MUSIC, target, AudioManager.FLAG_SHOW_UI)
-            updateAudioVolumeDisplay()
-        } catch (_: Exception) {
-        }
-    }
-
-    private fun updateAudioVolumeDisplay() {
-        try {
-            val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
-            val current = am.getStreamVolume(AudioManager.STREAM_MUSIC)
-            val max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-            val percent = if (max > 0) ((current.toFloat() / max.toFloat()) * 100).toInt() else 0
-            progressCcVolume.progress = percent
-            textCcVolumePercent.text = "$percent%"
-            textCcAudioSub.text = "Haut-parleurs TV ($percent%)"
-        } catch (_: Exception) {
-        }
-    }
-
     private fun getFormattedWifiStatus(): String {
         val details = displayResolutionManager.getConnectedWifiDetails(this)
-        val speedStr = displayResolutionManager.getWifiSpeedFormatted(this)
-        return if (speedStr != null && details.ssid != "Ethernet" && details.ssid != "Non connecté") {
-            "${details.ssid} • $speedStr"
-        } else {
-            details.ssid
-        }
+        return details.formattedStatus
     }
 
     private fun handleTopShelfHover(packageName: String, hasFocus: Boolean) {
@@ -537,48 +464,16 @@ class MainActivity : FragmentActivity() {
         controlCenterPanel.translationX = 420f
 
         textCcWifiStatus.text = getFormattedWifiStatus()
-        updateAudioVolumeDisplay()
 
-        val connectedDevices = bluetoothDeviceManager.getConnectedDevicesWithBatteryOrVolume()
-        if (connectedDevices.isNotEmpty()) {
-            val dev = connectedDevices.first()
-            layoutCcConnectedBluetooth.visibility = View.VISIBLE
-            textCcBtName.text = dev.name
-
-            val iconRes = when (dev.type) {
-                BluetoothDeviceManager.DeviceType.HEADSET -> R.drawable.ic_volume
-                BluetoothDeviceManager.DeviceType.GAMEPAD -> R.drawable.ic_gamepad
-                BluetoothDeviceManager.DeviceType.OTHER -> R.drawable.ic_gamepad
-            }
-            iconCcBtDevice.setImageResource(iconRes)
-
-            val details = mutableListOf<String>()
-            dev.batteryLevel?.let { details.add("Batterie : $it%") }
-            if (dev.type == BluetoothDeviceManager.DeviceType.HEADSET) {
-                dev.volumeLevel?.let { details.add("Volume : $it%") }
-            }
-            textCcBtDetails.text = if (details.isNotEmpty()) details.joinToString(" • ") else "Connecté"
-
-            val isLowBattery = dev.batteryLevel != null && dev.batteryLevel <= 20
-            badgeCcBtLowBattery.visibility = if (isLowBattery) View.VISIBLE else View.GONE
-
-            btnCcPower.nextFocusDownId = R.id.layout_cc_volume_slider
-            btnCcAudio.nextFocusDownId = R.id.layout_cc_volume_slider
-            layoutCcVolumeSlider.nextFocusDownId = R.id.layout_cc_connected_bluetooth
-            btnCcAllSettings.nextFocusUpId = R.id.layout_cc_connected_bluetooth
-            btnCcAccessibility.nextFocusUpId = R.id.layout_cc_connected_bluetooth
-            btnCcClose.nextFocusUpId = R.id.layout_cc_connected_bluetooth
+        // Détection de la télécommande / manette et niveau de batterie
+        val remoteInfo = bluetoothDeviceManager.getConnectedRemoteOrGamepadInfo()
+        textCcRemoteTitle.text = remoteInfo.name
+        textCcRemoteStatus.text = if (remoteInfo.batteryPercent != null) {
+            "Batterie : ${remoteInfo.batteryPercent}%"
         } else {
-            layoutCcConnectedBluetooth.visibility = View.GONE
-            badgeCcBtLowBattery.visibility = View.GONE
-
-            btnCcPower.nextFocusDownId = R.id.layout_cc_volume_slider
-            btnCcAudio.nextFocusDownId = R.id.layout_cc_volume_slider
-            layoutCcVolumeSlider.nextFocusDownId = R.id.btn_cc_close
-            btnCcAllSettings.nextFocusUpId = R.id.layout_cc_volume_slider
-            btnCcAccessibility.nextFocusUpId = R.id.layout_cc_volume_slider
-            btnCcClose.nextFocusUpId = R.id.layout_cc_volume_slider
+            "Connectée"
         }
+        badgeCcRemoteLowBattery.visibility = if (remoteInfo.isLowBattery) View.VISIBLE else View.GONE
 
         controlCenterContainer.animate()
             .alpha(1f)
