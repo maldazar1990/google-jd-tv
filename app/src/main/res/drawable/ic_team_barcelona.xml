@@ -1,0 +1,59 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- FC Barcelona - Blaugrana Shield -->
+    <!-- Gold Border Shield -->
+    <path
+        android:fillColor="#EDBB00"
+        android:pathData="M18,16 C30,16 38,12 48,8 C58,12 66,16 78,16 C80,38 78,64 48,88 C18,64 16,38 18,16 Z" />
+    <!-- White Shield Top Half Backing -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M21,19 C31,19 39,15 48,12 C57,15 65,19 75,19 C76,34 76,44 76,46 L20,46 C20,44 20,34 21,19 Z" />
+    <!-- Top-Left: St George Cross (Red on White) -->
+    <path
+        android:fillColor="#C41230"
+        android:pathData="M31,17 L37,17 L37,46 L31,46 Z" />
+    <path
+        android:fillColor="#C41230"
+        android:pathData="M21,29 L47,29 L47,35 L21,35 Z" />
+    <!-- Top-Right: Senyera (Yellow & Red Stripes) -->
+    <path
+        android:fillColor="#EDBB00"
+        android:pathData="M48,12 L75,19 C76,34 76,44 76,46 L48,46 Z" />
+    <path
+        android:fillColor="#C41230"
+        android:pathData="M54,16 L58,17 L58,46 L54,46 Z" />
+    <path
+        android:fillColor="#C41230"
+        android:pathData="M63,18 L67,19 L67,46 L63,46 Z" />
+    <path
+        android:fillColor="#C41230"
+        android:pathData="M72,19 L75,20 L75,46 L72,46 Z" />
+    <!-- Center Gold Divider Band -->
+    <path
+        android:fillColor="#EDBB00"
+        android:pathData="M20,44 L76,44 L76,50 L20,50 Z" />
+    <!-- Bottom Half: Blaugrana Vertical Stripes (Blue & Deep Red) -->
+    <!-- Blue Base -->
+    <path
+        android:fillColor="#004D98"
+        android:pathData="M20,50 L76,50 C76,62 60,78 48,84 C36,78 20,62 20,50 Z" />
+    <!-- Deep Red Stripes -->
+    <path
+        android:fillColor="#A50044"
+        android:pathData="M31,50 L40,50 L40,80 C36.5,77 33.5,74 31,70 Z" />
+    <path
+        android:fillColor="#A50044"
+        android:pathData="M56,50 L65,50 L65,70 C62.5,74 59.5,77 56,80 Z" />
+    <!-- Soccer Ball in Center -->
+    <path
+        android:fillColor="#EDBB00"
+        android:pathData="M48,42 A6,6 0 1,0 48,54 A6,6 0 1,0 48,42 Z" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M48,42 A6,6 0 1,0 48,54 A6,6 0 1,0 48,42 Z" />
+</vector>

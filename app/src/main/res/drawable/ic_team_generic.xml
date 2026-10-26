@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Generic Sports Team Crest (Shield, Stars & Ball) -->
+    <!-- Outer Shield Contour (Silver / White Glow) -->
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M48,8 L78,18 C78,48 66,74 48,88 C30,74 18,48 18,18 Z" />
+    <!-- Navy Shield Body -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M48,12 L74,21 C74,46 64,70 48,83 C32,70 22,46 22,21 Z" />
+    <!-- Gold Trim Border -->
+    <path
+        android:strokeColor="#F59E0B"
+        android:strokeWidth="2.5"
+        android:pathData="M48,16 L70,24 C70,45 61,66 48,78 C35,66 26,45 26,24 Z" />
+    <!-- Center Sports Ball (Vector) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,42 A14,14 0 1,0 48,70 A14,14 0 1,0 48,42 Z" />
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M48,50 L53,53 L51,59 L45,59 L43,53 Z" />
+    <path
+        android:strokeColor="#1E293B"
+        android:strokeWidth="1.5"
+        android:pathData="M48,50 L48,42 M53,53 L59,51 M51,59 L56,66 M45,59 L40,66 M43,53 L37,51" />
+    <!-- Top 3 Stars (Gold) -->
+    <!-- Center Star -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M48,22 L49.5,26.5 L54,26.5 L50.5,29.5 L52,34 L48,31 L44,34 L45.5,29.5 L42,26.5 L46.5,26.5 Z" />
+    <!-- Left Star -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M37,25 L38.2,28.5 L42,28.5 L39,31 L40.2,34.5 L37,32 L33.8,34.5 L35,31 L32,28.5 L35.8,28.5 Z" />
+    <!-- Right Star -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M59,25 L60.2,28.5 L64,28.5 L61,31 L62.2,34.5 L59,32 L55.8,34.5 L57,31 L54,28.5 L57.8,28.5 Z" />
+</vector>

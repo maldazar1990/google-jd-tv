@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sports_card_root"
+    android:layout_width="170dp"
+    android:layout_height="170dp"
+    android:background="@drawable/bg_sports_card"
+    android:clickable="false"
+    android:descendantFocusability="blocksDescendants"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingStart="10dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="10dp">
+
+    <!-- Sport Badge / Category Header -->
+    <TextView
+        android:id="@+id/text_sports_card_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:singleLine="true"
+        android:textColor="#C0FFFFFF"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        tools:text="🏒 LNH" />
+
+    <!-- Center Matchup Row: Home vs Away -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <!-- Home Team Column -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/image_sports_home_logo"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_team_canadiens" />
+
+            <TextView
+                android:id="@+id/text_sports_home_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:singleLine="true"
+                android:textColor="#E0FFFFFF"
+                android:textSize="11sp"
+                tools:text="MTL" />
+
+            <TextView
+                android:id="@+id/text_sports_home_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-bold"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="3" />
+        </LinearLayout>
+
+        <!-- Center VS / Separator -->
+        <TextView
+            android:id="@+id/text_sports_vs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:fontFamily="sans-serif-bold"
+            android:text="VS"
+            android:textColor="#80FFFFFF"
+            android:textSize="11sp" />
+
+        <!-- Away Team Column -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/image_sports_away_logo"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_team_leafs" />
+
+            <TextView
+                android:id="@+id/text_sports_away_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:singleLine="true"
+                android:textColor="#E0FFFFFF"
+                android:textSize="11sp"
+                tools:text="TOR" />
+
+            <TextView
+                android:id="@+id/text_sports_away_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-bold"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="2" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom Status (Period, Clock, Final) -->
+    <TextView
+        android:id="@+id/text_sports_card_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:singleLine="true"
+        android:textColor="#B0FFFFFF"
+        android:textSize="10sp"
+        tools:text="3e Période • 04:12" />
+
+</LinearLayout>

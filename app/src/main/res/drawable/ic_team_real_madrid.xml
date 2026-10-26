@@ -1,0 +1,54 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Real Madrid - Royal Crowned Shield (Gold, White, Purple) -->
+    <!-- Royal Crown at Top -->
+    <!-- Crown Red velvet interior -->
+    <path
+        android:fillColor="#C41230"
+        android:pathData="M34,22 C34,18 48,16 48,16 C48,16 62,18 62,22 L60,26 L36,26 Z" />
+    <!-- Crown Gold Structure -->
+    <path
+        android:fillColor="#FEBE10"
+        android:pathData="M32,27 L30,17 L38,21 L48,12 L58,21 L66,17 L64,27 Z" />
+    <!-- Crown Base Band with Jewels -->
+    <path
+        android:fillColor="#EE9A00"
+        android:pathData="M30,26 L66,26 L65,30 L31,30 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M37,28 A1.5,1.5 0 1,0 37,28.1 M48,28 A1.5,1.5 0 1,0 48,28.1 M59,28 A1.5,1.5 0 1,0 59,28.1" />
+    <!-- Crown Cross on Top -->
+    <path
+        android:fillColor="#FEBE10"
+        android:pathData="M46,8 L50,8 L50,14 L46,14 Z" />
+    <path
+        android:fillColor="#FEBE10"
+        android:pathData="M44,10 L52,10 L52,12 L44,12 Z" />
+    <!-- Circular Shield Base -->
+    <!-- Gold Outer Ring -->
+    <path
+        android:fillColor="#FEBE10"
+        android:pathData="M48,30 C64,30 77,43 77,59 C77,75 64,88 48,88 C32,88 19,75 19,59 C19,43 32,30 48,30 Z" />
+    <!-- White Circle Inner Background -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,34 C61.8,34 73,45.2 73,59 C73,72.8 61.8,84 48,84 C34.2,84 23,72.8 23,59 C23,45.2 34.2,34 48,34 Z" />
+    <!-- Diagonal Purple Sash (Castile Purple / Blue) -->
+    <path
+        android:fillColor="#532C6D"
+        android:pathData="M34,36 L43,34 L69,72 L60,77 Z" />
+    <!-- Gold Interlocking Initials / Monogram (M C F) -->
+    <path
+        android:strokeColor="#EE9A00"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M36,68 L36,52 L48,63 L60,52 L60,68" />
+    <path
+        android:strokeColor="#EE9A00"
+        android:strokeWidth="3"
+        android:pathData="M48,43 C40,43 36,49 36,56 C36,63 42,67 48,67" />
+</vector>

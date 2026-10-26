@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Montreal Canadiens - Iconic 'CH' Emblem (Red, Blue, White) -->
+    <!-- Outer Shield / Background Glow -->
+    <path
+        android:fillColor="#0DFFFFFF"
+        android:pathData="M48,6 C72,6 90,24 90,48 C90,72 72,90 48,90 C24,90 6,72 6,48 C6,24 24,6 48,6 Z" />
+    <!-- Blue Inner Field -->
+    <path
+        android:fillColor="#001E62"
+        android:pathData="M48,22 C64,22 76,34 76,48 C76,62 64,74 48,74 C32,74 20,62 20,48 C20,34 32,22 48,22 Z" />
+    <!-- White Trim for Outer C -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M80,34 C74,20 62,14 48,14 C28,14 12,28 12,48 C12,68 28,82 48,82 C62,82 74,76 80,62 L66,56 C62,65 55,70 48,70 C35,70 24,59 24,48 C24,37 35,26 48,26 C55,26 62,31 66,40 Z" />
+    <!-- Red Outer 'C' -->
+    <path
+        android:fillColor="#C41230"
+        android:pathData="M78,36 C73,23 62,18 48,18 C30,18 16,31 16,48 C16,65 30,78 48,78 C62,78 73,73 78,60 L65,55 C62,63 56,67 48,67 C37,67 27,58 27,48 C27,38 37,29 48,29 C56,29 62,33 65,41 Z" />
+    <!-- White Letter 'H' -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M39,37 L45,37 L45,45 L51,45 L51,37 L57,37 L57,59 L51,59 L51,51 L45,51 L45,59 L39,59 Z" />
+</vector>

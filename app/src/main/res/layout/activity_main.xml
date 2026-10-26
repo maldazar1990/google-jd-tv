@@ -179,6 +179,26 @@
     <!-- Scenic Wallpaper + Centered News Ticker + Bottom Dock    -->
     <!-- ======================================================== -->
 
+    <!-- SQUARE SPORTS CARD WIDGET: Live Scores with Team Logos -->
+    <FrameLayout
+        android:id="@+id/widget_sports_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="44dp"
+        android:clickable="false"
+        android:descendantFocusability="blocksDescendants"
+        android:elevation="12dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:visibility="gone">
+
+        <include
+            android:id="@+id/sports_card_view"
+            layout="@layout/view_sports_card" />
+    </FrameLayout>
+
     <!-- CENTER: Google News RSS Ticker / Top Shelf Pill -->
     <FrameLayout
         android:id="@+id/widget_news_container"

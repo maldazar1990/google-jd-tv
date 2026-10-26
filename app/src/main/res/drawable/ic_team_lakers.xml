@@ -1,0 +1,48 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Los Angeles Lakers - Iconic Purple & Gold Basketball -->
+    <!-- Purple Speed Streaks in background -->
+    <path
+        android:fillColor="#552583"
+        android:pathData="M6,36 L30,36 L24,42 L4,42 Z" />
+    <path
+        android:fillColor="#552583"
+        android:pathData="M10,48 L32,48 L28,54 L6,54 Z" />
+    <path
+        android:fillColor="#552583"
+        android:pathData="M14,60 L34,60 L30,66 L12,66 Z" />
+    <!-- White Ball Glow Border -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,12 C72.8,12 88,27.2 88,46 C88,64.8 72.8,80 54,80 C35.2,80 20,64.8 20,46 C20,27.2 35.2,12 54,12 Z" />
+    <!-- Gold Ball Body -->
+    <path
+        android:fillColor="#FDB927"
+        android:pathData="M54,15 C71.1,15 85,28.9 85,46 C85,63.1 71.1,77 54,77 C36.9,77 23,63.1 23,46 C23,28.9 36.9,15 54,15 Z" />
+    <!-- Purple Seam Lines -->
+    <!-- Horizontal Seam -->
+    <path
+        android:fillColor="#552583"
+        android:pathData="M23,45 L85,45 L85,47 L23,47 Z" />
+    <!-- Vertical Seam -->
+    <path
+        android:fillColor="#552583"
+        android:pathData="M53,15 L55,15 L55,77 L53,77 Z" />
+    <!-- Curved Left Seam -->
+    <path
+        android:strokeColor="#552583"
+        android:strokeWidth="2.5"
+        android:pathData="M37,21 C47,33 47,59 37,71" />
+    <!-- Curved Right Seam -->
+    <path
+        android:strokeColor="#552583"
+        android:strokeWidth="2.5"
+        android:pathData="M71,21 C61,33 61,59 71,71" />
+    <!-- Center White Star Badge -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,39 L56,43 L60,43.5 L57,46.5 L58,51 L54,48.5 L50,51 L51,46.5 L48,43.5 L52,43 Z" />
+</vector>

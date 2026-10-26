@@ -1,0 +1,55 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Boston Celtics - Iconic Shamrock / Clover (Green & White & Gold) -->
+    <!-- Gold Ring Outline -->
+    <path
+        android:strokeColor="#BA9653"
+        android:strokeWidth="3"
+        android:pathData="M48,8 A40,40 0 1,0 48,88 A40,40 0 1,0 48,8 Z" />
+    <!-- White Circle Fill -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,11 A37,37 0 1,0 48,85 A37,37 0 1,0 48,11 Z" />
+    <!-- Shamrock Stem -->
+    <path
+        android:strokeColor="#007A33"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M48,52 C48,68 40,78 34,80" />
+    <!-- Shamrock Leaves in Green (#007A33) -->
+    <!-- Top Leaf -->
+    <path
+        android:fillColor="#007A33"
+        android:pathData="M48,48 C41,40 33,32 37,23 C41,14 48,22 48,27 C48,22 55,14 59,23 C63,32 55,40 48,48 Z" />
+    <!-- Left Leaf -->
+    <path
+        android:fillColor="#007A33"
+        android:pathData="M48,48 C40,41 32,33 23,37 C14,41 22,48 27,48 C22,48 14,55 23,59 C32,63 40,55 48,48 Z" />
+    <!-- Right Leaf -->
+    <path
+        android:fillColor="#007A33"
+        android:pathData="M48,48 C56,41 64,33 73,37 C82,41 74,48 69,48 C74,48 82,55 73,59 C64,63 56,55 48,48 Z" />
+    <!-- Center Core Leaf Connect -->
+    <path
+        android:fillColor="#007A33"
+        android:pathData="M48,42 A6,6 0 1,0 48,54 A6,6 0 1,0 48,42 Z" />
+    <!-- Subtle White Vein Highlights -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:strokeAlpha="0.6"
+        android:pathData="M48,46 L48,28" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:strokeAlpha="0.6"
+        android:pathData="M46,48 L28,48" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:strokeAlpha="0.6"
+        android:pathData="M50,48 L68,48" />
+</vector>

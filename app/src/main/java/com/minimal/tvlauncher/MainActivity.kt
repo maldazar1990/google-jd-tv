@@ -89,9 +89,20 @@ class MainActivity : FragmentActivity() {
     private lateinit var iconWidgetWeather: ImageView
     private lateinit var textWidgetWeather: TextView
 
-    // News / Top Shelf / Sports Ticker
+    // News / Top Shelf
     private lateinit var widgetNewsContainer: FrameLayout
     private lateinit var textWidgetNews: TextView
+
+    // Sports Square Card Widget
+    private lateinit var widgetSportsContainer: FrameLayout
+    private lateinit var textSportsCardBadge: TextView
+    private lateinit var imageSportsHomeLogo: ImageView
+    private lateinit var textSportsHomeName: TextView
+    private lateinit var textSportsHomeScore: TextView
+    private lateinit var imageSportsAwayLogo: ImageView
+    private lateinit var textSportsAwayName: TextView
+    private lateinit var textSportsAwayScore: TextView
+    private lateinit var textSportsCardStatus: TextView
 
     // Control Center (Centre de Contrôle tvOS)
     private lateinit var controlCenterContainer: FrameLayout
@@ -203,6 +214,16 @@ class MainActivity : FragmentActivity() {
         widgetNewsContainer = findViewById(R.id.widget_news_container)
         textWidgetNews = findViewById(R.id.text_widget_news)
         textWidgetNews.isSelected = true
+
+        widgetSportsContainer = findViewById(R.id.widget_sports_container)
+        textSportsCardBadge = findViewById(R.id.text_sports_card_badge)
+        imageSportsHomeLogo = findViewById(R.id.image_sports_home_logo)
+        textSportsHomeName = findViewById(R.id.text_sports_home_name)
+        textSportsHomeScore = findViewById(R.id.text_sports_home_score)
+        imageSportsAwayLogo = findViewById(R.id.image_sports_away_logo)
+        textSportsAwayName = findViewById(R.id.text_sports_away_name)
+        textSportsAwayScore = findViewById(R.id.text_sports_away_score)
+        textSportsCardStatus = findViewById(R.id.text_sports_card_status)
 
         // Control Center
         controlCenterContainer = findViewById(R.id.control_center_container)
@@ -326,9 +347,11 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        // Informational only: News ticker is strictly non-focusable & non-clickable
+        // Informational only: News ticker and Sports card are strictly non-focusable & non-clickable
         widgetNewsContainer.isFocusable = false
         widgetNewsContainer.isClickable = false
+        widgetSportsContainer.isFocusable = false
+        widgetSportsContainer.isClickable = false
     }
 
     private fun setupControlCenter() {
@@ -522,6 +545,7 @@ class MainActivity : FragmentActivity() {
         if (isDrawerOpen) return
         isDrawerOpen = true
         widgetNewsContainer.visibility = View.GONE
+        widgetSportsContainer.visibility = View.GONE
 
         dockShelf.animate()
             .translationY(140f)
@@ -572,8 +596,11 @@ class MainActivity : FragmentActivity() {
             }
             .start()
 
-        if (preferencesManager.isNewsWidgetEnabled() || preferencesManager.isSportsWidgetEnabled()) {
+        if (preferencesManager.isNewsWidgetEnabled()) {
             widgetNewsContainer.visibility = View.VISIBLE
+        }
+        if (preferencesManager.isSportsWidgetEnabled()) {
+            widgetSportsContainer.visibility = View.VISIBLE
         }
 
         focusDockItem()
@@ -675,10 +702,12 @@ class MainActivity : FragmentActivity() {
         val weatherEnabled = preferencesManager.isWeatherWidgetEnabled()
         widgetWeatherContainer.visibility = if (weatherEnabled) View.VISIBLE else View.GONE
 
-        // 4. Center ticker: Google News or Sports Scoreboard
-        val sportsEnabled = preferencesManager.isSportsWidgetEnabled()
+        // 4. News ticker marquee & Sports square card coexistence
         val newsEnabled = preferencesManager.isNewsWidgetEnabled()
-        widgetNewsContainer.visibility = if ((sportsEnabled || newsEnabled) && !isDrawerOpen) View.VISIBLE else View.GONE
+        val sportsEnabled = preferencesManager.isSportsWidgetEnabled()
+
+        widgetNewsContainer.visibility = if (newsEnabled && !isDrawerOpen) View.VISIBLE else View.GONE
+        widgetSportsContainer.visibility = if (sportsEnabled && !isDrawerOpen) View.VISIBLE else View.GONE
 
         if (weatherEnabled || newsEnabled || sportsEnabled) {
             backgroundExecutor.execute {
@@ -719,27 +748,40 @@ class MainActivity : FragmentActivity() {
                     weatherString = weatherManager.getWeatherText(lat, lon, cityName)
                 }
 
-                var centerText: String? = null
-                if (sportsEnabled) {
-                    centerText = sportsManager.getSportsTickerText(
-                        sport = preferencesManager.getSportsType(),
-                        favoriteTeam = preferencesManager.getSportsFavoriteTeam()
-                    )
-                } else if (newsEnabled) {
+                var newsText: String? = null
+                if (newsEnabled) {
                     val topics = preferencesManager.getNewsTopics()
                     val sources = preferencesManager.getNewsSources()
                     val customKeyword = preferencesManager.getNewsCustomKeyword()
                     val legacyTopic = preferencesManager.getNewsTopic()
-                    centerText = newsManager.getNewsTickerText(topics, sources, customKeyword, legacyTopic)
+                    newsText = newsManager.getNewsTickerText(topics, sources, customKeyword, legacyTopic)
+                }
+
+                var sportsDetails: SportsManager.SportsMatchDetails? = null
+                if (sportsEnabled) {
+                    sportsDetails = sportsManager.getCurrentMatchDetails(
+                        sport = preferencesManager.getSportsType(),
+                        favoriteTeam = preferencesManager.getSportsFavoriteTeam()
+                    )
                 }
 
                 mainHandler.post {
                     if (weatherEnabled && weatherString != null) {
                         textWidgetWeather.text = weatherString
                     }
-                    if (centerText != null) {
-                        textWidgetNews.text = centerText
+                    if (newsEnabled && newsText != null) {
+                        textWidgetNews.text = newsText
                         textWidgetNews.isSelected = true
+                    }
+                    if (sportsEnabled && sportsDetails != null) {
+                        textSportsCardBadge.text = sportsDetails.sportBadge
+                        imageSportsHomeLogo.setImageResource(sportsDetails.homeLogoRes)
+                        textSportsHomeName.text = sportsDetails.homeTeam
+                        textSportsHomeScore.text = sportsDetails.homeScore.toString()
+                        imageSportsAwayLogo.setImageResource(sportsDetails.awayLogoRes)
+                        textSportsAwayName.text = sportsDetails.awayTeam
+                        textSportsAwayScore.text = sportsDetails.awayScore.toString()
+                        textSportsCardStatus.text = sportsDetails.status
                     }
                 }
             }
