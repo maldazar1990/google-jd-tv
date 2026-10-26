@@ -2,6 +2,7 @@ package com.minimal.tvlauncher.manager
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.provider.Settings
 import android.view.Display
 import androidx.test.core.app.ApplicationProvider
@@ -279,5 +280,29 @@ class DisplayResolutionManagerTest {
         assertThat(displayManager.getPhysicalTvName()).isEqualTo(displayManager.getDisplayInfo().physicalTvName)
         assertThat(displayManager.getDisplayBadgeText()).isEqualTo(displayManager.getDisplayInfo().displayBadgeText)
         assertThat(displayManager.getDisplaySubtitleText()).isEqualTo(displayManager.getDisplayInfo().displaySubtitleText)
+    }
+
+    @Test
+    fun sendDeviceToSleep_startsSleepIntent() {
+        val result = displayManager.sendDeviceToSleep(context)
+        assertThat(result).isTrue()
+
+        val shadowApp = shadowOf(context as Application)
+        val startedIntent = shadowApp.nextStartedActivity
+        assertThat(startedIntent).isNotNull()
+        assertThat(startedIntent.action).isEqualTo("com.google.android.pano.action.SLEEP")
+        assertThat(startedIntent.flags and Intent.FLAG_ACTIVITY_NEW_TASK).isNotEqualTo(0)
+    }
+
+    @Test
+    fun sendDeviceToSleep_companion_startsSleepIntent() {
+        val result = DisplayResolutionManager.sendDeviceToSleep(context)
+        assertThat(result).isTrue()
+
+        val shadowApp = shadowOf(context as Application)
+        val startedIntent = shadowApp.nextStartedActivity
+        assertThat(startedIntent).isNotNull()
+        assertThat(startedIntent.action).isEqualTo("com.google.android.pano.action.SLEEP")
+        assertThat(startedIntent.flags and Intent.FLAG_ACTIVITY_NEW_TASK).isNotEqualTo(0)
     }
 }

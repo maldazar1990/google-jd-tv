@@ -556,16 +556,62 @@ class DisplayResolutionManager(private val context: Context) {
         }
 
         private fun sendDeviceToSleepDirect(context: Context): Boolean {
+            // 1. Google TV native Pano SLEEP Activity
+            try {
+                val sleepIntent = Intent("com.google.android.pano.action.SLEEP").apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(sleepIntent)
+                return true
+            } catch (_: Exception) {}
+
+            // 2. DreamX Backdrop Google TV
+            try {
+                val dreamxIntent = Intent().apply {
+                    component = ComponentName(
+                        "com.google.android.apps.tv.dreamx",
+                        "com.google.android.apps.tv.dreamx.service.Backdrop"
+                    )
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(dreamxIntent)
+                return true
+            } catch (_: Exception) {}
+
+            // 3. Daydream Somnambulator
+            try {
+                val somnambulatorIntent = Intent().apply {
+                    component = ComponentName(
+                        "com.android.systemui",
+                        "com.android.systemui.Somnambulator"
+                    )
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(somnambulatorIntent)
+                return true
+            } catch (_: Exception) {}
+
+            // 4. Intent générique ACTION_DREAM
+            try {
+                val genericDreamIntent = Intent("android.intent.action.DREAM").apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(genericDreamIntent)
+                return true
+            } catch (_: Exception) {}
+
+            // 5. Broadcast Intent com.google.android.pano.action.SLEEP
+            try {
+                context.sendBroadcast(Intent("com.google.android.pano.action.SLEEP"))
+                return true
+            } catch (_: Exception) {}
+
+            // 6. Dernier recours défensif : input keyevent 223
             return try {
                 Runtime.getRuntime().exec(arrayOf("input", "keyevent", "223"))
                 true
             } catch (_: Exception) {
-                try {
-                    context.sendBroadcast(Intent("com.google.android.pano.action.SLEEP"))
-                    true
-                } catch (_: Exception) {
-                    false
-                }
+                false
             }
         }
     }

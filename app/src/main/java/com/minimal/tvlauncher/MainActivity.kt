@@ -948,7 +948,6 @@ class MainActivity : FragmentActivity() {
 
     private fun showWidgetsSettingsDialog() {
         val ramState = if (preferencesManager.isRamWidgetEnabled()) "Activé" else "Désactivé"
-        val netState = if (preferencesManager.isNetworkWidgetEnabled()) "Activé" else "Désactivé"
         val weatherState = if (preferencesManager.isWeatherWidgetEnabled()) "Activé (${preferencesManager.getWeatherCity()})" else "Désactivé"
         val newsState = if (preferencesManager.isNewsWidgetEnabled()) "Activé" else "Désactivé"
         val sportsState = if (preferencesManager.isSportsWidgetEnabled()) "Activé (${preferencesManager.getSportsType()})" else "Désactivé"
@@ -956,7 +955,6 @@ class MainActivity : FragmentActivity() {
 
         val options = arrayOf(
             "⚡ Widget RAM ($ramState)",
-            "📡 Widget Wi-Fi 6 ($netState)",
             "☀️ Configuration Météo ($weatherState)",
             "📰 Personnalisation Google News ($newsState)",
             "🏆 Scores Sports en direct ($sportsState)",
@@ -972,15 +970,10 @@ class MainActivity : FragmentActivity() {
                         refreshWidgetsAsync()
                         showWidgetsSettingsDialog()
                     }
-                    1 -> {
-                        preferencesManager.setNetworkWidgetEnabled(!preferencesManager.isNetworkWidgetEnabled())
-                        refreshWidgetsAsync()
-                        showWidgetsSettingsDialog()
-                    }
-                    2 -> showWeatherConfigDialog()
-                    3 -> showNewsPersonalizationDialog()
-                    4 -> showSportsConfigDialog()
-                    5 -> {
+                    1 -> showWeatherConfigDialog()
+                    2 -> showNewsPersonalizationDialog()
+                    3 -> showSportsConfigDialog()
+                    4 -> {
                         preferencesManager.setTopShelfEnabled(!preferencesManager.isTopShelfEnabled())
                         refreshWidgetsAsync()
                         showWidgetsSettingsDialog()
