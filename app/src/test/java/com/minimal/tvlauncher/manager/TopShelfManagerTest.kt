@@ -32,8 +32,15 @@ class TopShelfManagerTest {
 
     @Test
     fun getTopShelfItemForPackage_whenNoProviderAvailable_safelyReturnsNull() {
-        val result = topShelfManager.getTopShelfItemForPackage("com.netflix.ninja")
+        val result = topShelfManager.getTopShelfItemForPackage("com.unknown.nonexistent.app")
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun getTopShelfItemForPackage_whenStreamingApp_returnsCuratedFallback() {
+        val result = topShelfManager.getTopShelfItemForPackage("com.netflix.ninja")
+        assertThat(result).isNotNull()
+        assertThat(result?.title).contains("Netflix")
     }
 
     @Test
