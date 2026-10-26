@@ -481,6 +481,87 @@ class DisplayResolutionManager(private val context: Context) {
         return "Non connecté"
     }
 
+    /**
+     * Wi-Fi Connection Details data holder.
+     */
+    data class WifiConnectionDetails(
+        val ssid: String,
+        val linkSpeedMbps: Int?
+    ) {
+        val formattedStatus: String
+            get() = if (linkSpeedMbps != null && linkSpeedMbps > 0) {
+                "$ssid ($linkSpeedMbps Mbps)"
+            } else {
+                ssid
+            }
+    }
+
+    /**
+     * Retrieves the currently active Wi-Fi connection link speed in Mbps.
+     */
+    fun getWifiLinkSpeedMbps(ctx: Context = context): Int? {
+        return try {
+            val wm = ctx.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            @Suppress("DEPRECATION")
+            val info = wm?.connectionInfo
+            val speed = info?.linkSpeed
+            if (speed != null && speed > 0 && speed != -1) speed else null
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Formats the Wi-Fi speed as a string, e.g. "866 Mbps", or null if not connected.
+     */
+    fun getWifiSpeedFormatted(ctx: Context = context): String? {
+        val speed = getWifiLinkSpeedMbps(ctx) ?: return null
+        return "$speed Mbps"
+    }
+
+    /**
+     * Retrieves detailed Wi-Fi info including SSID and active connection link speed.
+     */
+    fun getConnectedWifiDetails(ctx: Context = context): WifiConnectionDetails {
+        val ssid = getConnectedWifiSsid(ctx)
+        val speed = if (ssid != "Ethernet" && ssid != "Non connecté") {
+            getWifiLinkSpeedMbps(ctx)
+        } else {
+            null
+        }
+        return WifiConnectionDetails(ssid = ssid, linkSpeedMbps = speed)
+    }
+
+    /**
+     * Puts Android TV to sleep using keyevent 223 (KEYCODE_SLEEP) or pano SLEEP broadcast fallback.
+     */
+    fun sendDeviceToSleep(ctx: Context = context): Boolean {
+        return sendDeviceToSleepDirect(ctx)
+    }
+
+    companion object {
+        /**
+         * Static utility to put Android TV to sleep using keyevent 223 or pano SLEEP broadcast fallback.
+         */
+        fun sendDeviceToSleep(context: Context): Boolean {
+            return sendDeviceToSleepDirect(context)
+        }
+
+        private fun sendDeviceToSleepDirect(context: Context): Boolean {
+            return try {
+                Runtime.getRuntime().exec(arrayOf("input", "keyevent", "223"))
+                true
+            } catch (_: Exception) {
+                try {
+                    context.sendBroadcast(Intent("com.google.android.pano.action.SLEEP"))
+                    true
+                } catch (_: Exception) {
+                    false
+                }
+            }
+        }
+    }
+
     private fun launchFirstAvailableIntent(targetContext: Context, intents: List<Intent>): Boolean {
         for (intent in intents) {
             try {

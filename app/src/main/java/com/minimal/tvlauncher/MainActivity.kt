@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -34,6 +35,9 @@ import com.minimal.tvlauncher.adapter.AppCardAdapter
 import com.minimal.tvlauncher.config.AppConfig
 import com.minimal.tvlauncher.manager.AppDiscoveryManager
 import com.minimal.tvlauncher.manager.BingWallpaperManager
+import com.minimal.tvlauncher.manager.BluetoothDeviceManager
+import android.content.res.ColorStateList
+import android.media.AudioManager
 import com.minimal.tvlauncher.manager.DisplayResolutionManager
 import com.minimal.tvlauncher.manager.IPreferencesManager
 import com.minimal.tvlauncher.manager.NewsManager
@@ -62,9 +66,11 @@ class MainActivity : FragmentActivity() {
     private lateinit var topShelfManager: TopShelfManager
     private lateinit var platformManager: PlatformManager
     private lateinit var displayResolutionManager: DisplayResolutionManager
+    private lateinit var bluetoothDeviceManager: BluetoothDeviceManager
 
     private lateinit var mainRoot: FrameLayout
     private lateinit var imageWallpaper: ImageView
+    private lateinit var imageTopShelfBackdrop: ImageView
     private lateinit var viewScrim: View
 
     private lateinit var dockShelf: FrameLayout
@@ -79,9 +85,6 @@ class MainActivity : FragmentActivity() {
     // Status Widgets
     private lateinit var widgetRamContainer: LinearLayout
     private lateinit var textWidgetRam: TextView
-    private lateinit var widgetNetworkContainer: LinearLayout
-    private lateinit var iconWidgetNetwork: ImageView
-    private lateinit var textWidgetNetwork: TextView
     private lateinit var widgetWeatherContainer: LinearLayout
     private lateinit var iconWidgetWeather: ImageView
     private lateinit var textWidgetWeather: TextView
@@ -97,9 +100,15 @@ class MainActivity : FragmentActivity() {
     private lateinit var btnCcWifi: View
     private lateinit var textCcWifiStatus: TextView
     private lateinit var btnCcAudio: View
-    private lateinit var btnCcGamepad: View
-    private lateinit var btnCcDisplay: View
-    private lateinit var textCcDisplayStatus: TextView
+    private lateinit var layoutCcVolumeSlider: LinearLayout
+    private lateinit var progressCcVolume: ProgressBar
+    private lateinit var textCcVolumePercent: TextView
+    private lateinit var textCcAudioSub: TextView
+    private lateinit var layoutCcConnectedBluetooth: LinearLayout
+    private lateinit var iconCcBtDevice: ImageView
+    private lateinit var textCcBtName: TextView
+    private lateinit var textCcBtDetails: TextView
+    private lateinit var badgeCcBtLowBattery: View
     private lateinit var btnCcAllSettings: View
     private lateinit var btnCcAccessibility: View
     private lateinit var btnCcClose: View
@@ -133,6 +142,7 @@ class MainActivity : FragmentActivity() {
         topShelfManager = TopShelfManager(this)
         platformManager = PlatformManager(preferencesManager.getPlatformOverride())
         displayResolutionManager = DisplayResolutionManager(this)
+        bluetoothDeviceManager = BluetoothDeviceManager(this)
 
         ensureDefaultWidgetPreferences()
         initViews()
@@ -177,6 +187,7 @@ class MainActivity : FragmentActivity() {
     private fun initViews() {
         mainRoot = findViewById(R.id.main_root)
         imageWallpaper = findViewById(R.id.image_wallpaper)
+        imageTopShelfBackdrop = findViewById(R.id.image_top_shelf_backdrop)
         viewScrim = findViewById(R.id.view_scrim)
 
         dockShelf = findViewById(R.id.dock_shelf)
@@ -190,9 +201,6 @@ class MainActivity : FragmentActivity() {
 
         widgetRamContainer = findViewById(R.id.widget_ram_container)
         textWidgetRam = findViewById(R.id.text_widget_ram)
-        widgetNetworkContainer = findViewById(R.id.widget_network_container)
-        iconWidgetNetwork = findViewById(R.id.icon_widget_network)
-        textWidgetNetwork = findViewById(R.id.text_widget_network)
         widgetWeatherContainer = findViewById(R.id.widget_weather_container)
         iconWidgetWeather = findViewById(R.id.icon_widget_weather)
         textWidgetWeather = findViewById(R.id.text_widget_weather)
@@ -208,9 +216,15 @@ class MainActivity : FragmentActivity() {
         btnCcWifi = findViewById(R.id.btn_cc_wifi)
         textCcWifiStatus = findViewById(R.id.text_cc_wifi_status)
         btnCcAudio = findViewById(R.id.btn_cc_audio)
-        btnCcGamepad = findViewById(R.id.btn_cc_gamepad)
-        btnCcDisplay = findViewById(R.id.btn_cc_display)
-        textCcDisplayStatus = findViewById(R.id.text_cc_display_status)
+        layoutCcVolumeSlider = findViewById(R.id.layout_cc_volume_slider)
+        progressCcVolume = findViewById(R.id.progress_cc_volume)
+        textCcVolumePercent = findViewById(R.id.text_cc_volume_percent)
+        textCcAudioSub = findViewById(R.id.text_cc_audio_sub)
+        layoutCcConnectedBluetooth = findViewById(R.id.layout_cc_connected_bluetooth)
+        iconCcBtDevice = findViewById(R.id.icon_cc_bt_device)
+        textCcBtName = findViewById(R.id.text_cc_bt_name)
+        textCcBtDetails = findViewById(R.id.text_cc_bt_details)
+        badgeCcBtLowBattery = findViewById(R.id.badge_cc_bt_low_battery)
         btnCcAllSettings = findViewById(R.id.btn_cc_all_settings)
         btnCcAccessibility = findViewById(R.id.btn_cc_accessibility)
         btnCcClose = findViewById(R.id.btn_cc_close)
@@ -233,20 +247,7 @@ class MainActivity : FragmentActivity() {
                         lastDockFocusPosition = pos
                     }
                 }
-                // Top Shelf Preview on Dock hover
-                if (hasFocus && preferencesManager.isTopShelfEnabled()) {
-                    backgroundExecutor.execute {
-                        val item = topShelfManager.getTopShelfItemForPackage(app.packageName)
-                        if (item != null) {
-                            mainHandler.post {
-                                val epText = item.subtitle?.let { " - $it" } ?: ""
-                                textWidgetNews.text = "▶ ${item.title}$epText"
-                                textWidgetNews.isSelected = true
-                                widgetNewsContainer.visibility = View.VISIBLE
-                            }
-                        }
-                    }
-                }
+                handleTopShelfHover(app.packageName, hasFocus)
             },
             nextFocusDownId = R.id.recycler_drawer,
             nextFocusUpId = R.id.btn_settings,
@@ -271,6 +272,9 @@ class MainActivity : FragmentActivity() {
             preferencesManager = preferencesManager,
             onAppClick = { app -> discoveryManager.launchApp(app) },
             onAppLongClick = { app, _ -> showAppContextMenu(app) },
+            onAppFocus = { app, hasFocus ->
+                handleTopShelfHover(app.packageName, hasFocus)
+            },
             nextFocusUpId = R.id.recycler_favorites,
             onDpadKeyDown = { position, keyCode ->
                 if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
@@ -347,8 +351,8 @@ class MainActivity : FragmentActivity() {
             btnCcPower,
             btnCcWifi,
             btnCcAudio,
-            btnCcGamepad,
-            btnCcDisplay,
+            layoutCcVolumeSlider,
+            layoutCcConnectedBluetooth,
             btnCcAllSettings,
             btnCcAccessibility,
             btnCcClose
@@ -367,94 +371,157 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        // 1. Veille / Eteindre
+        // 1. Veille : mise en sommeil directe
         btnCcPower.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
-            AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-                .setTitle("Alimentation TV")
-                .setMessage("Mettre votre téléviseur en veille ou accéder aux réglages d'énergie ?")
-                .setPositiveButton("Mettre en veille") { _, _ ->
-                    try {
-                        val powerIntent = Intent(Intent.ACTION_SCREEN_OFF)
-                        sendBroadcast(powerIntent)
-                    } catch (_: Exception) {
-                    }
-                }
-                .setNeutralButton("Paramètres Énergie") { _, _ ->
-                    try {
-                        startActivity(Intent(Settings.ACTION_SETTINGS))
-                    } catch (_: Exception) {
-                    }
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
+            displayResolutionManager.sendDeviceToSleep(this)
         }
 
         // 2. Wi-Fi
         btnCcWifi.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
-            try {
-                startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
-            } catch (_: Exception) {
-                try {
-                    startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
-                } catch (_: Exception) {
-                    startActivity(Intent(Settings.ACTION_SETTINGS))
-                }
-            }
+            displayResolutionManager.openWifiSettings(this)
         }
 
-        // 3. Audio & Son
+        // 3. Audio & Son : Clic ouvrant directement les paramètres son Android TV
         btnCcAudio.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
-            try {
-                startActivity(Intent(Settings.ACTION_SOUND_SETTINGS))
-            } catch (_: Exception) {
-                val current = preferencesManager.isAudioFeedbackEnabled()
-                preferencesManager.setAudioFeedbackEnabled(!current)
-                Toast.makeText(
-                    this,
-                    if (!current) "Rétroaction sonore D-Pad activée" else "Rétroaction sonore désactivée",
-                    Toast.LENGTH_SHORT
-                ).show()
+            displayResolutionManager.openSoundSettings(this)
+        }
+
+        // Range Slider interactif de volume : D-Pad GAUCHE / DROITE en direct
+        layoutCcVolumeSlider.setOnKeyListener { _, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        adjustMusicVolume(-1)
+                        true
+                    }
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                        adjustMusicVolume(1)
+                        true
+                    }
+                    else -> false
+                }
+            } else {
+                false
             }
         }
-
-        // 4. Manettes & Bluetooth
-        btnCcGamepad.setOnClickListener {
+        layoutCcVolumeSlider.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
-            try {
-                startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
-            } catch (_: Exception) {
-                startActivity(Intent(Settings.ACTION_SETTINGS))
-            }
+            displayResolutionManager.openSoundSettings(this)
         }
 
-        // 5. Affichage TV & Résolution 4K
-        btnCcDisplay.setOnClickListener {
+        // Section Bluetooth
+        layoutCcConnectedBluetooth.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
-            closeControlCenter()
-            showDisplayInfoDialog()
+            displayResolutionManager.openBluetoothSettings(this)
         }
 
-        // 6. Tous les Réglages Zen TV
+        // 4. Tous les Réglages Zen TV
         btnCcAllSettings.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
             closeControlCenter()
             showSettingsDialog()
         }
 
-        // 7. Accessibilité
+        // 5. Accessibilité
         btnCcAccessibility.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
             closeControlCenter()
             showAccessibilityAndSystemDialog()
         }
 
-        // 8. Fermer
+        // 6. Fermer
         btnCcClose.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
             closeControlCenter()
+        }
+    }
+
+    private fun adjustMusicVolume(delta: Int) {
+        try {
+            val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
+            val current = am.getStreamVolume(AudioManager.STREAM_MUSIC)
+            val max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            val min = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) am.getStreamMinVolume(AudioManager.STREAM_MUSIC) else 0
+            val target = (current + delta).coerceIn(min, max)
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, target, AudioManager.FLAG_SHOW_UI)
+            updateAudioVolumeDisplay()
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun updateAudioVolumeDisplay() {
+        try {
+            val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
+            val current = am.getStreamVolume(AudioManager.STREAM_MUSIC)
+            val max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            val percent = if (max > 0) ((current.toFloat() / max.toFloat()) * 100).toInt() else 0
+            progressCcVolume.progress = percent
+            textCcVolumePercent.text = "$percent%"
+            textCcAudioSub.text = "Haut-parleurs TV ($percent%)"
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun getFormattedWifiStatus(): String {
+        val details = displayResolutionManager.getConnectedWifiDetails(this)
+        val speedStr = displayResolutionManager.getWifiSpeedFormatted(this)
+        return if (speedStr != null && details.ssid != "Ethernet" && details.ssid != "Non connecté") {
+            "${details.ssid} • $speedStr"
+        } else {
+            details.ssid
+        }
+    }
+
+    private fun handleTopShelfHover(packageName: String, hasFocus: Boolean) {
+        if (!hasFocus) {
+            imageTopShelfBackdrop.animate()
+                .alpha(0f)
+                .setDuration(250)
+                .withEndAction {
+                    imageTopShelfBackdrop.setImageDrawable(null)
+                }
+                .start()
+            return
+        }
+
+        if (!preferencesManager.isTopShelfEnabled()) return
+
+        backgroundExecutor.execute {
+            val item = topShelfManager.getTopShelfItemForPackage(packageName)
+            val bitmap = item?.posterUri?.let { uri -> topShelfManager.loadPosterBitmap(uri) }
+            mainHandler.post {
+                if (item != null) {
+                    val epText = item.subtitle?.let { " - $it" } ?: ""
+                    textWidgetNews.text = "▶ ${item.title}$epText"
+                    textWidgetNews.isSelected = true
+                    widgetNewsContainer.visibility = View.VISIBLE
+
+                    if (bitmap != null) {
+                        imageTopShelfBackdrop.setImageBitmap(bitmap)
+                        imageTopShelfBackdrop.animate()
+                            .alpha(1f)
+                            .setDuration(300)
+                            .start()
+                    } else if (item.posterUri != null) {
+                        try {
+                            imageTopShelfBackdrop.setImageURI(item.posterUri)
+                            imageTopShelfBackdrop.animate()
+                                .alpha(1f)
+                                .setDuration(300)
+                                .start()
+                        } catch (_: Exception) {
+                            imageTopShelfBackdrop.animate().alpha(0f).setDuration(200).start()
+                        }
+                    } else {
+                        imageTopShelfBackdrop.animate().alpha(0f).setDuration(200).start()
+                    }
+                } else {
+                    imageTopShelfBackdrop.animate().alpha(0f).setDuration(200).start()
+                }
+            }
         }
     }
 
@@ -469,15 +536,48 @@ class MainActivity : FragmentActivity() {
         controlCenterContainer.alpha = 0f
         controlCenterPanel.translationX = 420f
 
-        val netStatus = textWidgetNetwork.text.toString()
-        textCcWifiStatus.text = if (netStatus.isNotBlank()) netStatus else "Connecté (Wi-Fi 6)"
+        textCcWifiStatus.text = getFormattedWifiStatus()
+        updateAudioVolumeDisplay()
 
-        val displayInfo = displayResolutionManager.getDisplayInfo()
-        val is4k = displayInfo.isTv4KHardwareCapable || displayInfo.resolutionType == DisplayResolutionManager.ResolutionType.UHD_4K
-        textCcDisplayStatus.text = if (is4k) {
-            "${displayInfo.resolutionType.label} • 4K actif"
+        val connectedDevices = bluetoothDeviceManager.getConnectedDevicesWithBatteryOrVolume()
+        if (connectedDevices.isNotEmpty()) {
+            val dev = connectedDevices.first()
+            layoutCcConnectedBluetooth.visibility = View.VISIBLE
+            textCcBtName.text = dev.name
+
+            val iconRes = when (dev.type) {
+                BluetoothDeviceManager.DeviceType.HEADSET -> R.drawable.ic_volume
+                BluetoothDeviceManager.DeviceType.GAMEPAD -> R.drawable.ic_gamepad
+                BluetoothDeviceManager.DeviceType.OTHER -> R.drawable.ic_gamepad
+            }
+            iconCcBtDevice.setImageResource(iconRes)
+
+            val details = mutableListOf<String>()
+            dev.batteryLevel?.let { details.add("Batterie : $it%") }
+            if (dev.type == BluetoothDeviceManager.DeviceType.HEADSET) {
+                dev.volumeLevel?.let { details.add("Volume : $it%") }
+            }
+            textCcBtDetails.text = if (details.isNotEmpty()) details.joinToString(" • ") else "Connecté"
+
+            val isLowBattery = dev.batteryLevel != null && dev.batteryLevel <= 20
+            badgeCcBtLowBattery.visibility = if (isLowBattery) View.VISIBLE else View.GONE
+
+            btnCcPower.nextFocusDownId = R.id.layout_cc_volume_slider
+            btnCcAudio.nextFocusDownId = R.id.layout_cc_volume_slider
+            layoutCcVolumeSlider.nextFocusDownId = R.id.layout_cc_connected_bluetooth
+            btnCcAllSettings.nextFocusUpId = R.id.layout_cc_connected_bluetooth
+            btnCcAccessibility.nextFocusUpId = R.id.layout_cc_connected_bluetooth
+            btnCcClose.nextFocusUpId = R.id.layout_cc_connected_bluetooth
         } else {
-            "Cliquer pour activer la 4K"
+            layoutCcConnectedBluetooth.visibility = View.GONE
+            badgeCcBtLowBattery.visibility = View.GONE
+
+            btnCcPower.nextFocusDownId = R.id.layout_cc_volume_slider
+            btnCcAudio.nextFocusDownId = R.id.layout_cc_volume_slider
+            layoutCcVolumeSlider.nextFocusDownId = R.id.btn_cc_close
+            btnCcAllSettings.nextFocusUpId = R.id.layout_cc_volume_slider
+            btnCcAccessibility.nextFocusUpId = R.id.layout_cc_volume_slider
+            btnCcClose.nextFocusUpId = R.id.layout_cc_volume_slider
         }
 
         controlCenterContainer.animate()
@@ -673,19 +773,8 @@ class MainActivity : FragmentActivity() {
             textWidgetRam.text = ramText
         }
 
-        // 2. Network widget
-        val networkEnabled = preferencesManager.isNetworkWidgetEnabled()
-        widgetNetworkContainer.visibility = if (networkEnabled) View.VISIBLE else View.GONE
-        if (networkEnabled) {
-            val (iconRes, netLabel) = when (widgetManager.getNetworkStatus()) {
-                WidgetManager.NetworkType.ETHERNET -> Pair(R.drawable.ic_wifi, "Ethernet")
-                WidgetManager.NetworkType.WIFI -> Pair(R.drawable.ic_wifi, "Wi-Fi 6")
-                WidgetManager.NetworkType.NONE -> Pair(R.drawable.ic_wifi, "Non connecté")
-            }
-            iconWidgetNetwork.setImageResource(iconRes)
-            textWidgetNetwork.text = netLabel
-            textCcWifiStatus.text = netLabel
-        }
+        // Update Control Center Wi-Fi status
+        textCcWifiStatus.text = getFormattedWifiStatus()
 
         // 3. Weather widget
         val weatherEnabled = preferencesManager.isWeatherWidgetEnabled()

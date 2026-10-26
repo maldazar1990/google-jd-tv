@@ -72,7 +72,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:nextFocusDown="@+id/btn_cc_display"
+                android:nextFocusDown="@+id/layout_cc_volume_slider"
                 android:nextFocusLeft="@+id/btn_cc_power"
                 android:nextFocusRight="@+id/btn_cc_wifi"
                 android:nextFocusUp="@+id/btn_cc_power"
@@ -85,6 +85,7 @@
                     android:layout_height="38dp"
                     android:layout_marginBottom="8dp"
                     android:contentDescription="@null"
+                    android:duplicateParentState="true"
                     android:src="@drawable/ic_power"
                     app:tint="@color/color_cc_icon_tint" />
 
@@ -92,6 +93,7 @@
                     android:id="@+id/text_cc_power_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:duplicateParentState="true"
                     android:fontFamily="sans-serif-medium"
                     android:text="Veille"
                     android:textColor="@color/color_cc_item_text"
@@ -131,6 +133,7 @@
                         android:layout_height="22dp"
                         android:layout_marginEnd="10dp"
                         android:contentDescription="@null"
+                        android:duplicateParentState="true"
                         android:src="@drawable/ic_wifi"
                         app:tint="@color/color_cc_icon_tint" />
 
@@ -138,12 +141,14 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:duplicateParentState="true"
                         android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/text_cc_wifi_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:duplicateParentState="true"
                             android:fontFamily="sans-serif-medium"
                             android:text="Wi-Fi"
                             android:textColor="@color/color_cc_item_text"
@@ -154,6 +159,7 @@
                             android:id="@+id/text_cc_wifi_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:duplicateParentState="true"
                             android:ellipsize="end"
                             android:fontFamily="sans-serif"
                             android:singleLine="true"
@@ -163,7 +169,7 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Audio & Son -->
+                <!-- Audio & Son : Accès direct aux réglages audio système -->
                 <LinearLayout
                     android:id="@+id/btn_cc_audio"
                     android:layout_width="match_parent"
@@ -173,7 +179,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
-                    android:nextFocusDown="@+id/btn_cc_gamepad"
+                    android:nextFocusDown="@+id/layout_cc_volume_slider"
                     android:nextFocusLeft="@+id/btn_cc_power"
                     android:nextFocusRight="@+id/btn_cc_audio"
                     android:nextFocusUp="@+id/btn_cc_wifi"
@@ -187,6 +193,7 @@
                         android:layout_height="22dp"
                         android:layout_marginEnd="10dp"
                         android:contentDescription="@null"
+                        android:duplicateParentState="true"
                         android:src="@drawable/ic_volume"
                         app:tint="@color/color_cc_icon_tint" />
 
@@ -194,12 +201,14 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:duplicateParentState="true"
                         android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/text_cc_audio_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:duplicateParentState="true"
                             android:fontFamily="sans-serif-medium"
                             android:text="Audio &amp; Son"
                             android:textColor="@color/color_cc_item_text"
@@ -210,6 +219,7 @@
                             android:id="@+id/text_cc_audio_sub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:duplicateParentState="true"
                             android:ellipsize="end"
                             android:fontFamily="sans-serif"
                             android:singleLine="true"
@@ -221,131 +231,145 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Ligne 2 : Affichage TV (gauche) + Manettes & Bluetooth (droite) -->
+        <!-- Range Slider Interactif Contrôle Sonore en Temps Réel -->
         <LinearLayout
+            android:id="@+id/layout_cc_volume_slider"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginBottom="14dp"
+            android:layout_height="52dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_control_center_item_selector"
+            android:clickable="true"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:orientation="horizontal">
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:nextFocusDown="@+id/btn_cc_close"
+            android:nextFocusLeft="@+id/layout_cc_volume_slider"
+            android:nextFocusRight="@+id/layout_cc_volume_slider"
+            android:nextFocusUp="@+id/btn_cc_power"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
 
-            <!-- Affichage TV 4K TCL -->
-            <LinearLayout
-                android:id="@+id/btn_cc_display"
+            <ImageView
+                android:id="@+id/icon_cc_volume_slider"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="10dp"
+                android:contentDescription="@null"
+                android:duplicateParentState="true"
+                android:src="@drawable/ic_volume"
+                app:tint="@color/color_cc_icon_tint" />
+
+            <ProgressBar
+                android:id="@+id/progress_cc_volume"
+                style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="6dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_control_center_item_selector"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:nextFocusDown="@+id/btn_cc_all_settings"
-                android:nextFocusLeft="@+id/btn_cc_display"
-                android:nextFocusRight="@+id/btn_cc_gamepad"
-                android:nextFocusUp="@+id/btn_cc_power"
-                android:orientation="horizontal"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp">
+                android:layout_marginEnd="12dp"
+                android:max="100"
+                android:progress="70"
+                android:progressDrawable="@drawable/bg_cc_volume_progress" />
 
-                <ImageView
-                    android:id="@+id/icon_cc_display"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_marginEnd="8dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_display"
-                    app:tint="@color/color_cc_icon_tint" />
+            <TextView
+                android:id="@+id/text_cc_volume_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:duplicateParentState="true"
+                android:fontFamily="sans-serif-medium"
+                android:text="70%"
+                android:textColor="@color/color_cc_item_text"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="0dp"
+        <!-- Section Dynamique Bluetooth (Casque ou Manette connectés avec batterie/volume) -->
+        <LinearLayout
+            android:id="@+id/layout_cc_connected_bluetooth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_control_center_item_selector"
+            android:clickable="true"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:nextFocusDown="@+id/btn_cc_accessibility"
+            android:nextFocusLeft="@+id/layout_cc_connected_bluetooth"
+            android:nextFocusRight="@+id/layout_cc_connected_bluetooth"
+            android:nextFocusUp="@+id/layout_cc_volume_slider"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:id="@+id/icon_cc_bt_device"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="10dp"
+                android:contentDescription="@null"
+                android:duplicateParentState="true"
+                android:src="@drawable/ic_gamepad"
+                app:tint="@color/color_cc_icon_tint" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:duplicateParentState="true"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/text_cc_bt_name"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:duplicateParentState="true"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif-medium"
+                    android:singleLine="true"
+                    android:textColor="@color/color_cc_item_text"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="Xbox Wireless Controller" />
 
-                    <TextView
-                        android:id="@+id/text_cc_display_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:fontFamily="sans-serif-medium"
-                        android:singleLine="true"
-                        android:text="Affichage TV"
-                        android:textColor="@color/color_cc_item_text"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/text_cc_display_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:fontFamily="sans-serif"
-                        android:singleLine="true"
-                        android:text="Cliquer pour activer la 4K"
-                        android:textColor="@color/color_cc_item_subtext"
-                        android:textSize="10sp" />
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/text_cc_bt_details"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:duplicateParentState="true"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif"
+                    android:singleLine="true"
+                    android:textColor="@color/color_cc_item_subtext"
+                    android:textSize="11sp"
+                    tools:text="Batterie : 85%" />
             </LinearLayout>
 
-            <!-- Manettes & Bluetooth -->
-            <LinearLayout
-                android:id="@+id/btn_cc_gamepad"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/bg_control_center_item_selector"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:nextFocusDown="@+id/btn_cc_close"
-                android:nextFocusLeft="@+id/btn_cc_display"
-                android:nextFocusRight="@+id/btn_cc_gamepad"
-                android:nextFocusUp="@+id/btn_cc_audio"
-                android:orientation="horizontal"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp">
+            <!-- Badge rouge Alerte Batterie Faible (<= 20%) avec [!] blanc en gras -->
+            <FrameLayout
+                android:id="@+id/badge_cc_bt_low_battery"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_cc_battery_low_badge"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-                <ImageView
-                    android:id="@+id/icon_cc_gamepad"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_marginEnd="8dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_gamepad"
-                    app:tint="@color/color_cc_icon_tint" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/text_cc_gamepad_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:fontFamily="sans-serif-medium"
-                        android:singleLine="true"
-                        android:text="Manettes"
-                        android:textColor="@color/color_cc_item_text"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/text_cc_gamepad_sub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:fontFamily="sans-serif"
-                        android:singleLine="true"
-                        android:text="Bluetooth"
-                        android:textColor="@color/color_cc_item_subtext"
-                        android:textSize="10sp" />
-                </LinearLayout>
-            </LinearLayout>
+                    android:layout_gravity="center"
+                    android:text="!"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
         </LinearLayout>
 
         <!-- Ligne 3 : Rangée d'icônes rondes en bas (Réglages Zen TV, Accessibilité, Fermer) -->
@@ -370,7 +394,7 @@
                 android:nextFocusDown="@+id/btn_cc_all_settings"
                 android:nextFocusLeft="@+id/btn_cc_all_settings"
                 android:nextFocusRight="@+id/btn_cc_accessibility"
-                android:nextFocusUp="@+id/btn_cc_display">
+                android:nextFocusUp="@+id/layout_cc_volume_slider">
 
                 <ImageView
                     android:id="@+id/icon_cc_settings"
@@ -378,6 +402,7 @@
                     android:layout_height="24dp"
                     android:layout_gravity="center"
                     android:contentDescription="@null"
+                    android:duplicateParentState="true"
                     android:src="@drawable/ic_settings"
                     app:tint="@color/color_cc_icon_tint" />
             </FrameLayout>
@@ -395,7 +420,7 @@
                 android:nextFocusDown="@+id/btn_cc_accessibility"
                 android:nextFocusLeft="@+id/btn_cc_all_settings"
                 android:nextFocusRight="@+id/btn_cc_close"
-                android:nextFocusUp="@+id/btn_cc_display">
+                android:nextFocusUp="@+id/layout_cc_volume_slider">
 
                 <ImageView
                     android:id="@+id/icon_cc_accessibility"
@@ -403,6 +428,7 @@
                     android:layout_height="24dp"
                     android:layout_gravity="center"
                     android:contentDescription="@null"
+                    android:duplicateParentState="true"
                     android:src="@drawable/ic_accessibility"
                     app:tint="@color/color_cc_icon_tint" />
             </FrameLayout>
@@ -419,7 +445,7 @@
                 android:nextFocusDown="@+id/btn_cc_close"
                 android:nextFocusLeft="@+id/btn_cc_accessibility"
                 android:nextFocusRight="@+id/btn_cc_close"
-                android:nextFocusUp="@+id/btn_cc_gamepad">
+                android:nextFocusUp="@+id/layout_cc_volume_slider">
 
                 <ImageView
                     android:id="@+id/icon_cc_close"
@@ -427,6 +453,7 @@
                     android:layout_height="22dp"
                     android:layout_gravity="center"
                     android:contentDescription="@null"
+                    android:duplicateParentState="true"
                     android:src="@drawable/ic_close"
                     app:tint="@color/color_cc_icon_tint" />
             </FrameLayout>

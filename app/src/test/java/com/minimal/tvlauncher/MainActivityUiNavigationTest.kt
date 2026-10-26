@@ -74,8 +74,8 @@ class MainActivityUiNavigationTest {
         val btnCcPower = activity.findViewById<View>(R.id.btn_cc_power)
         val btnCcWifi = activity.findViewById<View>(R.id.btn_cc_wifi)
         val btnCcAudio = activity.findViewById<View>(R.id.btn_cc_audio)
-        val btnCcGamepad = activity.findViewById<View>(R.id.btn_cc_gamepad)
-        val btnCcDisplay = activity.findViewById<View>(R.id.btn_cc_display)
+        val layoutCcVolumeSlider = activity.findViewById<View>(R.id.layout_cc_volume_slider)
+        val layoutCcConnectedBluetooth = activity.findViewById<View>(R.id.layout_cc_connected_bluetooth)
         val btnCcAllSettings = activity.findViewById<View>(R.id.btn_cc_all_settings)
         val btnCcAccessibility = activity.findViewById<View>(R.id.btn_cc_accessibility)
         val btnCcClose = activity.findViewById<View>(R.id.btn_cc_close)
@@ -83,8 +83,8 @@ class MainActivityUiNavigationTest {
         assertThat(btnCcPower).isNotNull()
         assertThat(btnCcWifi).isNotNull()
         assertThat(btnCcAudio).isNotNull()
-        assertThat(btnCcGamepad).isNotNull()
-        assertThat(btnCcDisplay).isNotNull()
+        assertThat(layoutCcVolumeSlider).isNotNull()
+        assertThat(layoutCcConnectedBluetooth).isNotNull()
         assertThat(btnCcAllSettings).isNotNull()
         assertThat(btnCcAccessibility).isNotNull()
         assertThat(btnCcClose).isNotNull()
@@ -92,13 +92,13 @@ class MainActivityUiNavigationTest {
         // Focus given to first button (btnCcPower)
         assertThat(btnCcPower.isFocused).isTrue()
 
-        // Check D-Pad chained navigation
-        assertThat(btnCcPower.nextFocusDownId).isEqualTo(R.id.btn_cc_display)
+        // Check D-Pad chained navigation (without connected bluetooth device)
+        assertThat(btnCcPower.nextFocusDownId).isEqualTo(R.id.layout_cc_volume_slider)
         assertThat(btnCcPower.nextFocusRightId).isEqualTo(R.id.btn_cc_wifi)
         assertThat(btnCcWifi.nextFocusDownId).isEqualTo(R.id.btn_cc_audio)
         assertThat(btnCcWifi.nextFocusLeftId).isEqualTo(R.id.btn_cc_power)
-        assertThat(btnCcAudio.nextFocusDownId).isEqualTo(R.id.btn_cc_gamepad)
-        assertThat(btnCcDisplay.nextFocusRightId).isEqualTo(R.id.btn_cc_gamepad)
+        assertThat(btnCcAudio.nextFocusDownId).isEqualTo(R.id.layout_cc_volume_slider)
+        assertThat(layoutCcVolumeSlider.nextFocusDownId).isEqualTo(R.id.btn_cc_close)
         assertThat(btnCcAllSettings.nextFocusRightId).isEqualTo(R.id.btn_cc_accessibility)
         assertThat(btnCcAccessibility.nextFocusRightId).isEqualTo(R.id.btn_cc_close)
     }
@@ -242,5 +242,16 @@ class MainActivityUiNavigationTest {
 
         assertThat(handledUp).isTrue()
         assertThat(dockShelf.visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun headerBar_hasNoWifiCapsule_andHasTopShelfBackdropLayer() {
+        val netId = activity.resources.getIdentifier("widget_network_container", "id", activity.packageName)
+        val imageTopShelfBackdrop = activity.findViewById<View>(R.id.image_top_shelf_backdrop)
+        val imageWallpaper = activity.findViewById<View>(R.id.image_wallpaper)
+
+        assertThat(netId).isEqualTo(0)
+        assertThat(imageTopShelfBackdrop).isNotNull()
+        assertThat(imageWallpaper).isNotNull()
     }
 }

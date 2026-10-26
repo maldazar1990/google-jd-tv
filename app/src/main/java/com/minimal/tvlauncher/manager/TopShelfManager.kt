@@ -2,12 +2,16 @@ package com.minimal.tvlauncher.manager
 
 import android.content.Context
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.LruCache
 
 /**
  * Lightweight, zero-leak Apple TV style Top Shelf manager.
  * Queries Android TV TvContract (content://android.media.tv/watch_next_program and preview_program)
  * to retrieve "Watch Next" and promoted episodes/content for the hovered Dock app.
+ * Provides memory-efficient RGB_565 downsampling and an LRU cache for poster art.
  */
 class TopShelfManager(private val context: Context) {
 
@@ -16,7 +20,15 @@ class TopShelfManager(private val context: Context) {
         val subtitle: String?,
         val posterUri: Uri?,
         val intentUri: Uri?
-    )
+    ) {
+        val posterArtUri: Uri? get() = posterUri
+    }
+
+    private val posterCache = object : LruCache<String, Bitmap>(MAX_POSTER_CACHE_BYTES) {
+        override fun sizeOf(key: String, value: Bitmap): Int {
+            return value.byteCount
+        }
+    }
 
     companion object {
         val WATCH_NEXT_URI: Uri = Uri.parse("content://android.media.tv/watch_next_program")
@@ -27,6 +39,85 @@ class TopShelfManager(private val context: Context) {
         private const val COLUMN_EPISODE_TITLE = "episode_title"
         private const val COLUMN_POSTER_ART_URI = "poster_art_uri"
         private const val COLUMN_INTENT_URI = "intent_uri"
+
+        // Maximum 4 MB in-memory cache to strictly preserve the 30 MB launcher RAM limit
+        const val MAX_POSTER_CACHE_BYTES = 4 * 1024 * 1024
+    }
+
+    /**
+     * Retrieves cached poster bitmap if available.
+     */
+    fun getCachedPosterBitmap(uri: Uri?): Bitmap? {
+        if (uri == null) return null
+        return posterCache.get(uri.toString())
+    }
+
+    /**
+     * Stores a bitmap in the poster art LRU cache.
+     */
+    fun cachePosterBitmap(uri: Uri, bitmap: Bitmap) {
+        posterCache.put(uri.toString(), bitmap)
+    }
+
+    /**
+     * Clears all cached poster art bitmaps.
+     */
+    fun clearPosterCache() {
+        posterCache.evictAll()
+    }
+
+    /**
+     * Memory-efficient downsampling and decoding of poster artwork from Uri.
+     * Uses RGB_565 config for 50% memory reduction on Android TV.
+     */
+    fun loadPosterBitmap(uri: Uri?, reqWidth: Int = 1280, reqHeight: Int = 720): Bitmap? {
+        if (uri == null) return null
+        val key = uri.toString()
+        posterCache.get(key)?.let { return it }
+
+        return try {
+            val options = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                BitmapFactory.decodeStream(stream, null, options)
+            }
+
+            if (options.outWidth <= 0 || options.outHeight <= 0) return null
+
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
+            options.inJustDecodeBounds = false
+            options.inPreferredConfig = Bitmap.Config.RGB_565
+
+            val bitmap = context.contentResolver.openInputStream(uri)?.use { stream ->
+                BitmapFactory.decodeStream(stream, null, options)
+            }
+
+            if (bitmap != null) {
+                posterCache.put(key, bitmap)
+            }
+            bitmap
+        } catch (_: OutOfMemoryError) {
+            posterCache.evictAll()
+            null
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val height = options.outHeight
+        val width = options.outWidth
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+        return inSampleSize
     }
 
     /**

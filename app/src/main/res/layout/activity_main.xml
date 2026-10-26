@@ -18,6 +18,16 @@
         android:scaleType="centerCrop"
         android:src="@drawable/bg_default_scenic" />
 
+    <!-- Top Shelf Backdrop Layer (Promoted poster art for hovered dock/drawer app) -->
+    <ImageView
+        android:id="@+id/image_top_shelf_backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop" />
+
+
     <!-- Dark Contrast Scrim for WCAG 4.5:1 text compliance -->
     <View
         android:id="@+id/view_scrim"
@@ -107,37 +117,7 @@
                     tools:text="RAM: 1.2G libre" />
             </LinearLayout>
 
-            <!-- Capsule 2: Network Connectivity -->
-            <LinearLayout
-                android:id="@+id/widget_network_container"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginEnd="10dp"
-                android:background="@drawable/bg_capsule_pill"
-                android:gravity="center"
-                android:paddingStart="12dp"
-                android:paddingEnd="14dp">
-
-                <ImageView
-                    android:id="@+id/icon_widget_network"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginEnd="6dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_wifi"
-                    app:tint="#FFFFFF" />
-
-                <TextView
-                    android:id="@+id/text_widget_network"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:text="Wi-Fi 6" />
-            </LinearLayout>
-
-            <!-- Capsule 3: Weather -->
+                        <!-- Capsule 3: Weather -->
             <LinearLayout
                 android:id="@+id/widget_weather_container"
                 android:layout_width="wrap_content"
