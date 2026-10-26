@@ -76,10 +76,22 @@ class TopShelfManager(private val context: Context) {
         posterCache.get(key)?.let { return it }
 
         return try {
+            val openStream: () -> java.io.InputStream? = {
+                val scheme = uri.scheme?.lowercase()
+                if (scheme == "http" || scheme == "https") {
+                    val conn = java.net.URL(uri.toString()).openConnection()
+                    conn.connectTimeout = 4000
+                    conn.readTimeout = 4000
+                    conn.getInputStream()
+                } else {
+                    context.contentResolver.openInputStream(uri)
+                }
+            }
+
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
             }
-            context.contentResolver.openInputStream(uri)?.use { stream ->
+            openStream()?.use { stream ->
                 BitmapFactory.decodeStream(stream, null, options)
             }
 
@@ -89,7 +101,7 @@ class TopShelfManager(private val context: Context) {
             options.inJustDecodeBounds = false
             options.inPreferredConfig = Bitmap.Config.RGB_565
 
-            val bitmap = context.contentResolver.openInputStream(uri)?.use { stream ->
+            val bitmap = openStream()?.use { stream ->
                 BitmapFactory.decodeStream(stream, null, options)
             }
 
@@ -130,7 +142,58 @@ class TopShelfManager(private val context: Context) {
         val watchNext = queryProgramUri(WATCH_NEXT_URI, packageName)
         if (watchNext != null) return watchNext
 
-        return queryProgramUri(PREVIEW_PROGRAMS_URI, packageName)
+        val preview = queryProgramUri(PREVIEW_PROGRAMS_URI, packageName)
+        if (preview != null) return preview
+
+        return getCuratedFallbackForPackage(packageName)
+    }
+
+    private fun getCuratedFallbackForPackage(packageName: String): TopShelfItem? {
+        return when (packageName) {
+            "com.netflix.ninja" -> TopShelfItem(
+                title = "Netflix",
+                subtitle = "Films et séries en streaming 4K HDR",
+                posterUri = Uri.parse("https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=1280&q=80"),
+                intentUri = null
+            )
+            "com.amazon.amazonvideo.livingroom" -> TopShelfItem(
+                title = "Prime Video",
+                subtitle = "Séries originales Amazon & Cinéma",
+                posterUri = Uri.parse("https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1280&q=80"),
+                intentUri = null
+            )
+            "ca.bellmedia.cravetv" -> TopShelfItem(
+                title = "Crave",
+                subtitle = "HBO, Max Originals et séries exclusives",
+                posterUri = Uri.parse("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1280&q=80"),
+                intentUri = null
+            )
+            "com.google.android.youtube.tv" -> TopShelfItem(
+                title = "YouTube",
+                subtitle = "Tendances et vidéos recommandées",
+                posterUri = Uri.parse("https://images.unsplash.com/photo-1518173946687-a4c8a383392e?w=1280&q=80"),
+                intentUri = null
+            )
+            "com.spotify.tv.android" -> TopShelfItem(
+                title = "Spotify",
+                subtitle = "Musique et ambiances sonores en continu",
+                posterUri = Uri.parse("https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1280&q=80"),
+                intentUri = null
+            )
+            "tv.twitch.android.app" -> TopShelfItem(
+                title = "Twitch",
+                subtitle = "Jeux vidéo et diffusions en direct",
+                posterUri = Uri.parse("https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1280&q=80"),
+                intentUri = null
+            )
+            "org.videolan.vlc" -> TopShelfItem(
+                title = "VLC Media Player",
+                subtitle = "Lecteur multimédia cinéma local et réseau",
+                posterUri = Uri.parse("https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=1280&q=80"),
+                intentUri = null
+            )
+            else -> null
+        }
     }
 
     private fun queryProgramUri(uri: Uri, packageName: String): TopShelfItem? {
