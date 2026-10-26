@@ -305,4 +305,28 @@ class DisplayResolutionManagerTest {
         assertThat(startedIntent.action).isEqualTo("com.google.android.pano.action.SLEEP")
         assertThat(startedIntent.flags and Intent.FLAG_ACTIVITY_NEW_TASK).isNotEqualTo(0)
     }
+
+    @Test
+    fun wifiConnectionDetails_formattedStatus_formatsCorrectly() {
+        val detailsSsid = DisplayResolutionManager.WifiConnectionDetails("maison", 433)
+        assertThat(detailsSsid.formattedStatus).isEqualTo("Connecté • maison")
+
+        val detailsWifi = DisplayResolutionManager.WifiConnectionDetails("Wi-Fi", 433)
+        assertThat(detailsWifi.formattedStatus).isEqualTo("Connecté")
+
+        val detailsEthernet = DisplayResolutionManager.WifiConnectionDetails("Ethernet", null)
+        assertThat(detailsEthernet.formattedStatus).isEqualTo("Connecté • Ethernet")
+
+        val detailsOffline = DisplayResolutionManager.WifiConnectionDetails("Non connecté", null)
+        assertThat(detailsOffline.formattedStatus).isEqualTo("Non connecté")
+    }
+
+    @Test
+    fun sendTvCecStandby_executesDefensively() {
+        // Must execute cleanly without uncaught exceptions
+        val result = displayManager.sendTvCecStandby(context)
+        val companionResult = DisplayResolutionManager.sendTvCecStandby(context)
+        assertThat(result).isNotNull()
+        assertThat(companionResult).isNotNull()
+    }
 }

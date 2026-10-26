@@ -18,6 +18,8 @@
     <!-- Nécessaire pour Bing Daily 4K Wallpaper et statut réseau -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" tools:targetApi="31" />
     <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" />
 
     <application

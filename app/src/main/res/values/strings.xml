@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Zen TV</string>
+    <string name="app_name">jd tv</string>
     <string name="section_favorites">Favoris</string>
     <string name="section_all_apps">Toutes les applications</string>
     <string name="no_apps_found">Aucune application trouvée</string>

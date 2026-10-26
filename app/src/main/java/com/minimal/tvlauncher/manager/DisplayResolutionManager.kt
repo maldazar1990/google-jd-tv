@@ -446,6 +446,13 @@ class DisplayResolutionManager(private val context: Context) {
                         return "Ethernet"
                     }
                     if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            val wifiInfo = caps.transportInfo as? android.net.wifi.WifiInfo
+                            val transportSsid = wifiInfo?.ssid?.replace("\"", "")?.trim()
+                            if (!transportSsid.isNullOrEmpty() && transportSsid != "<unknown ssid>") {
+                                return transportSsid
+                            }
+                        }
                         val wm = ctx.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
                         @Suppress("DEPRECATION")
                         val info = wm?.connectionInfo
@@ -489,10 +496,12 @@ class DisplayResolutionManager(private val context: Context) {
         val linkSpeedMbps: Int?
     ) {
         val formattedStatus: String
-            get() = if (linkSpeedMbps != null && linkSpeedMbps > 0 && ssid != "Ethernet" && ssid != "Non connecté") {
-                "$ssid • $linkSpeedMbps Mbps"
-            } else {
-                ssid
+            get() = when {
+                ssid == "Non connecté" -> "Non connecté"
+                ssid == "Ethernet" -> "Connecté • Ethernet"
+                ssid.equals("Wi-Fi", ignoreCase = true) || ssid.isBlank() || ssid == "<unknown ssid>" -> "Connecté"
+                ssid.startsWith("Connecté", ignoreCase = true) -> ssid
+                else -> "Connecté • $ssid"
             }
     }
 
@@ -547,12 +556,75 @@ class DisplayResolutionManager(private val context: Context) {
         return sendDeviceToSleepDirect(ctx)
     }
 
+    /**
+     * Physically turns off / puts connected TV into standby via HDMI-CEC opcode 0x36.
+     */
+    fun sendTvCecStandby(ctx: Context = context): Boolean {
+        return sendTvCecStandbyDirect(ctx)
+    }
+
     companion object {
         /**
          * Static utility to put Android TV to sleep using keyevent 223 or pano SLEEP broadcast fallback.
          */
         fun sendDeviceToSleep(context: Context): Boolean {
             return sendDeviceToSleepDirect(context)
+        }
+
+        fun sendTvCecStandby(context: Context): Boolean {
+            return sendTvCecStandbyDirect(context)
+        }
+
+        private fun sendTvCecStandbyDirect(context: Context): Boolean {
+            // 1. Reflection to HdmiControlManager -> HdmiPlaybackClient.sendStandby() (CEC opcode 0x36)
+            try {
+                val hdmiManager = context.getSystemService("hdmi_control")
+                if (hdmiManager != null) {
+                    val getPlaybackClient = hdmiManager.javaClass.getMethod("getPlaybackClient")
+                    val client = getPlaybackClient.invoke(hdmiManager)
+                    if (client != null) {
+                        val sendStandby = client.javaClass.getMethod("sendStandby")
+                        sendStandby.invoke(client)
+                        return true
+                    }
+                }
+            } catch (_: Exception) {}
+
+            // 2. Reflection to HdmiControlManager -> getTvClient()
+            try {
+                val hdmiManager = context.getSystemService("hdmi_control")
+                if (hdmiManager != null) {
+                    val getTvClient = hdmiManager.javaClass.getMethod("getTvClient")
+                    val client = getTvClient.invoke(hdmiManager)
+                    if (client != null) {
+                        val sendStandby = client.javaClass.getMethod("sendStandby")
+                        sendStandby.invoke(client)
+                        return true
+                    }
+                }
+            } catch (_: Exception) {}
+
+            // 3. Fallback: Broadcast Intent
+            try {
+                val cecIntent = Intent("android.hardware.hdmi.action.STANDBY").apply {
+                    addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                }
+                context.sendBroadcast(cecIntent)
+            } catch (_: Exception) {}
+
+            // 4. Fallback: input keyevent 177 (KEYCODE_TV_POWER)
+            try {
+                Runtime.getRuntime().exec(arrayOf("input", "keyevent", "177"))
+                return true
+            } catch (_: Exception) {}
+
+            // 5. Fallback: input keyevent 26 (KEYCODE_POWER)
+            return try {
+                Runtime.getRuntime().exec(arrayOf("input", "keyevent", "26"))
+                true
+            } catch (_: Exception) {
+                false
+            }
         }
 
         private fun sendDeviceToSleepDirect(context: Context): Boolean {

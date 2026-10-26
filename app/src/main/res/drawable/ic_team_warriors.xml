@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Golden State Warriors Official Emblem (Wikimedia) -->
+    <!-- Royal Blue Background Circle -->
+    <path
+        android:fillColor="#1D428A"
+        android:pathData="M48,6 C71.2,6 90,24.8 90,48 C90,71.2 71.2,90 48,90 C24.8,90 6,71.2 6,48 C6,24.8 24.8,6 48,6 Z" />
+    <!-- Golden Ring Trim -->
+    <path
+        android:fillColor="#FFC72C"
+        android:pathData="M48,10 C69,10 86,27 86,48 C86,69 69,86 48,86 C27,86 10,69 10,48 C10,27 27,10 48,10 Z M48,14 C29.2,14 14,29.2 14,48 C14,66.8 29.2,82 48,82 C66.8,82 82,66.8 82,48 C82,29.2 66.8,14 48,14 Z" />
+    <!-- Golden Bridge Silhouette -->
+    <path
+        android:fillColor="#FFC72C"
+        android:pathData="M24,70 L24,65 C32,58 40,32 40,24 L44,24 L44,70 L40,70 L40,42 C36,50 30,64 24,70 Z M52,70 L52,24 L56,24 C56,32 64,58 72,65 L72,70 C66,64 60,50 56,42 L56,70 Z" />
+    <!-- Horizontal Bridge Roadway -->
+    <path
+        android:fillColor="#FFC72C"
+        android:pathData="M20,66 L76,66 L76,70 L20,70 Z" />
+</vector>

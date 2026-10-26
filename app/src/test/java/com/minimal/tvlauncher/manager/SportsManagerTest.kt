@@ -133,6 +133,31 @@ class SportsManagerTest {
     }
 
     @Test
+    fun getLogoResourceForTeam_matchesNewOfficialLogos() {
+        // PSG
+        assertThat(sportsManager.getLogoResourceForTeam("Paris SG")).isEqualTo(R.drawable.ic_team_psg)
+        assertThat(sportsManager.getLogoResourceForTeam("PSG")).isEqualTo(R.drawable.ic_team_psg)
+
+        // Warriors
+        assertThat(sportsManager.getLogoResourceForTeam("Golden State Warriors")).isEqualTo(R.drawable.ic_team_warriors)
+        assertThat(sportsManager.getLogoResourceForTeam("GSW")).isEqualTo(R.drawable.ic_team_warriors)
+
+        // Bruins
+        assertThat(sportsManager.getLogoResourceForTeam("Boston Bruins")).isEqualTo(R.drawable.ic_team_bruins)
+
+        // Oilers
+        assertThat(sportsManager.getLogoResourceForTeam("Edmonton Oilers")).isEqualTo(R.drawable.ic_team_oilers)
+        assertThat(sportsManager.getLogoResourceForTeam("EDM")).isEqualTo(R.drawable.ic_team_oilers)
+
+        // Rangers
+        assertThat(sportsManager.getLogoResourceForTeam("New York Rangers")).isEqualTo(R.drawable.ic_team_rangers)
+        assertThat(sportsManager.getLogoResourceForTeam("NYR")).isEqualTo(R.drawable.ic_team_rangers)
+
+        // Raptors
+        assertThat(sportsManager.getLogoResourceForTeam("Toronto Raptors")).isEqualTo(R.drawable.ic_team_raptors)
+    }
+
+    @Test
     fun getLogoResourceForTeam_returnsGenericForUnknownTeam() {
         val unknowns = listOf("Unknown FC", "Team 123", "", "Random Club")
         for (team in unknowns) {

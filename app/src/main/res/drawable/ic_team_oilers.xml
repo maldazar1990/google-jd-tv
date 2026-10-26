@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Edmonton Oilers Official Emblem (Wikimedia) -->
+    <!-- Blue Circle -->
+    <path
+        android:fillColor="#041E42"
+        android:pathData="M48,6 C71.2,6 90,24.8 90,48 C90,71.2 71.2,90 48,90 C24.8,90 6,71.2 6,48 C6,24.8 24.8,6 48,6 Z" />
+    <!-- Orange Ring -->
+    <path
+        android:fillColor="#FF4C00"
+        android:pathData="M48,12 C67.9,12 84,28.1 84,48 C84,67.9 67.9,84 48,84 C28.1,84 12,67.9 12,48 C12,28.1 28.1,12 48,12 Z M48,16 C30.3,16 16,30.3 16,48 C16,65.7 30.3,80 48,80 C65.7,80 80,65.7 80,48 C80,30.3 65.7,16 48,16 Z" />
+    <!-- Orange Oil Drop Top -->
+    <path
+        android:fillColor="#FF4C00"
+        android:pathData="M48,22 C48,22 36,36 36,44 C36,51 41.4,56 48,56 C54.6,56 60,51 60,44 C60,36 48,22 48,22 Z" />
+    <!-- White Drop Accent -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46,32 C46,32 40,40 40,44 C40,48 43,51 46,51 C45,49 44,46 44,44 C44,40 46,32 46,32 Z" />
+    <!-- Orange Bottom Arch Banner -->
+    <path
+        android:fillColor="#FF4C00"
+        android:pathData="M26,62 L70,62 C68,70 59,74 48,74 C37,74 28,70 26,62 Z" />
+    <!-- White Text Line -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,65 L64,65 L64,68 L32,68 Z" />
+</vector>

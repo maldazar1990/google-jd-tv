@@ -179,59 +179,56 @@
     <!-- Scenic Wallpaper + Centered News Ticker + Bottom Dock    -->
     <!-- ======================================================== -->
 
-    <!-- SQUARE SPORTS CARD WIDGET: Live Scores with Team Logos -->
-    <FrameLayout
-        android:id="@+id/widget_sports_container"
+    <!-- RIGHT DASHBOARD COLUMN: Square News Card (Top) + Square Sports Card (Below) -->
+    <LinearLayout
+        android:id="@+id/dashboard_widgets_column"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
         android:layout_marginTop="80dp"
         android:layout_marginEnd="44dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:clickable="false"
         android:descendantFocusability="blocksDescendants"
         android:elevation="12dp"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:visibility="gone">
+        android:orientation="vertical">
 
-        <include
-            android:id="@+id/sports_card_view"
-            layout="@layout/view_sports_card" />
-    </FrameLayout>
-
-    <!-- CENTER: Google News RSS Ticker / Top Shelf Pill -->
-    <FrameLayout
-        android:id="@+id/widget_news_container"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="164dp"
-        android:background="@drawable/bg_capsule_pill"
-        android:clickable="false"
-        android:descendantFocusability="blocksDescendants"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:paddingStart="22dp"
-        android:paddingEnd="22dp">
-
-        <TextView
-            android:id="@+id/text_widget_news"
+        <!-- SQUARE NEWS CARD WIDGET: Top Headlines (Above Sports) -->
+        <FrameLayout
+            android:id="@+id/widget_news_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_marginBottom="12dp"
             android:clickable="false"
-            android:ellipsize="marquee"
-            android:fadingEdge="horizontal"
-            android:fadingEdgeLength="20dp"
+            android:descendantFocusability="blocksDescendants"
             android:focusable="false"
-            android:fontFamily="sans-serif-medium"
-            android:marqueeRepeatLimit="marquee_forever"
-            android:maxWidth="820dp"
-            android:singleLine="true"
-            android:textColor="#F0FFFFFF"
-            android:textSize="14sp"
-            tools:text="Google News : Découverte majeure dans l'exploration spatiale..." />
-    </FrameLayout>
+            android:focusableInTouchMode="false"
+            android:visibility="gone">
+
+            <include
+                android:id="@+id/news_card_view"
+                layout="@layout/view_news_card" />
+        </FrameLayout>
+
+        <!-- SQUARE SPORTS CARD WIDGET: Live Scores with Team Logos -->
+        <FrameLayout
+            android:id="@+id/widget_sports_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:descendantFocusability="blocksDescendants"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:visibility="gone">
+
+            <include
+                android:id="@+id/sports_card_view"
+                layout="@layout/view_sports_card" />
+        </FrameLayout>
+    </LinearLayout>
 
     <!-- BOTTOM DOCK SHELF: Exactly 5 Widescreen Favorite Apps pinned at bottom -->
     <FrameLayout

@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Boston Bruins Official Spoked B Emblem (Wikimedia) -->
+    <!-- Outer Black Circle -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M48,6 C71.2,6 90,24.8 90,48 C90,71.2 71.2,90 48,90 C24.8,90 6,71.2 6,48 C6,24.8 24.8,6 48,6 Z" />
+    <!-- Gold Ring -->
+    <path
+        android:fillColor="#FFB81C"
+        android:pathData="M48,10 C69,10 86,27 86,48 C86,69 69,86 48,86 C27,86 10,69 10,48 C10,27 27,10 48,10 Z M48,15 C29.8,15 15,29.8 15,48 C15,66.2 29.8,81 48,81 C66.2,81 81,66.2 81,48 C81,29.8 66.2,15 48,15 Z" />
+    <!-- Gold Spokes -->
+    <path
+        android:fillColor="#FFB81C"
+        android:pathData="M46,15 L50,15 L50,81 L46,81 Z M15,46 L81,46 L81,50 L15,50 Z M25,25 L71,71 L68,74 L22,28 Z M71,25 L25,71 L22,68 L68,22 Z" />
+    <!-- Inner Black Field -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M48,22 C62.4,22 74,33.6 74,48 C74,62.4 62.4,74 48,74 C33.6,74 22,62.4 22,48 C22,33.6 33.6,22 48,22 Z" />
+    <!-- Boston Gold 'B' Letter -->
+    <path
+        android:fillColor="#FFB81C"
+        android:pathData="M38,28 L53,28 C58,28 62,31 62,36 C62,39 60,42 56,44 C61,46 64,50 64,55 C64,61 59,68 52,68 L38,68 Z M45,35 L45,44 L51,44 C54,44 56,42 56,39 C56,36 54,35 51,35 Z M45,51 L45,61 L53,61 C56,61 58,59 58,56 C58,53 56,51 53,51 Z" />
+    <!-- White B Inner Accent -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M41,31 L52,31 C56,31 59,33 59,36 C59,39 57,41 53,42 L53,45 C58,46 60,49 60,54 C60,59 56,64 50,64 L41,64 Z M45,36 L45,43 L50,43 C52,43 54,41 54,39 C54,37 52,36 50,36 Z M45,52 L45,59 L51,59 C53,59 55,57 55,55 C55,53 53,52 51,52 Z" />
+</vector>

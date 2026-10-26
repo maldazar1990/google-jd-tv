@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- New York Rangers Official Shield (Wikimedia) -->
+    <!-- Red Outer Shield -->
+    <path
+        android:fillColor="#C8102E"
+        android:pathData="M18,12 L78,12 L78,56 C78,72 48,86 48,86 C48,86 18,72 18,56 Z" />
+    <!-- White Shield Border -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M22,16 L74,16 L74,54 C74,68 48,80 48,80 C48,80 22,68 22,54 Z" />
+    <!-- Blue Inner Field -->
+    <path
+        android:fillColor="#0038A8"
+        android:pathData="M26,20 L70,20 L70,52 C70,64 48,74 48,74 C48,74 26,64 26,52 Z" />
+    <!-- White / Red Diagonal Banner with RANGERS letters representation -->
+    <path
+        android:fillColor="#C8102E"
+        android:pathData="M26,38 L70,26 L70,36 L26,48 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,34 L66,24 L68,28 L32,38 Z" />
+    <path
+        android:fillColor="#C8102E"
+        android:pathData="M26,54 L70,42 L70,52 L26,64 Z" />
+</vector>

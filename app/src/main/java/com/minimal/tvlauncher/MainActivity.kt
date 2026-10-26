@@ -108,6 +108,7 @@ class MainActivity : FragmentActivity() {
     private lateinit var controlCenterContainer: FrameLayout
     private lateinit var controlCenterPanel: LinearLayout
     private lateinit var btnCcPower: View
+    private lateinit var btnCcCecPower: View
     private lateinit var btnCcWifi: View
     private lateinit var textCcWifiStatus: TextView
     private lateinit var btnCcRemoteBattery: View
@@ -229,6 +230,7 @@ class MainActivity : FragmentActivity() {
         controlCenterContainer = findViewById(R.id.control_center_container)
         controlCenterPanel = findViewById(R.id.control_center_panel)
         btnCcPower = findViewById(R.id.btn_cc_power)
+        btnCcCecPower = findViewById(R.id.btn_cc_cec_power)
         btnCcWifi = findViewById(R.id.btn_cc_wifi)
         textCcWifiStatus = findViewById(R.id.text_cc_wifi_status)
         btnCcRemoteBattery = findViewById(R.id.btn_cc_remote_battery)
@@ -387,6 +389,12 @@ class MainActivity : FragmentActivity() {
             displayResolutionManager.sendDeviceToSleep(this)
         }
 
+        // 1b. Éteindre TV : HDMI-CEC Standby physique
+        btnCcCecPower.setOnClickListener {
+            if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
+            displayResolutionManager.sendTvCecStandby(this)
+        }
+
         // 2. Wi-Fi
         btnCcWifi.setOnClickListener {
             if (preferencesManager.isAudioFeedbackEnabled()) it.playSoundEffect(SoundEffectConstants.CLICK)
@@ -492,7 +500,7 @@ class MainActivity : FragmentActivity() {
         val remoteInfo = bluetoothDeviceManager.getConnectedRemoteOrGamepadInfo()
         textCcRemoteTitle.text = remoteInfo.name
         textCcRemoteStatus.text = if (remoteInfo.batteryPercent != null) {
-            "Batterie : ${remoteInfo.batteryPercent}%"
+            "${remoteInfo.batteryPercent}%"
         } else {
             "Connectée"
         }
@@ -770,7 +778,7 @@ class MainActivity : FragmentActivity() {
                         textWidgetWeather.text = weatherString
                     }
                     if (newsEnabled && newsText != null) {
-                        textWidgetNews.text = newsText
+                        textWidgetNews.text = newsText.removePrefix("Google News : ").removePrefix("Google News: ").trim()
                         textWidgetNews.isSelected = true
                     }
                     if (sportsEnabled && sportsDetails != null) {

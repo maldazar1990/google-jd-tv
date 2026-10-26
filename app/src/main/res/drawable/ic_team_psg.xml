@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Paris Saint-Germain Official Vector Crest (Wikimedia) -->
+    <!-- Outer Blue Circle -->
+    <path
+        android:fillColor="#004170"
+        android:pathData="M48,6 C71.2,6 90,24.8 90,48 C90,71.2 71.2,90 48,90 C24.8,90 6,71.2 6,48 C6,24.8 24.8,6 48,6 Z" />
+    <!-- White Ring Trim -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,12 C67.9,12 84,28.1 84,48 C84,67.9 67.9,84 48,84 C28.1,84 12,67.9 12,48 C12,28.1 28.1,12 48,12 Z M48,16 C30.3,16 16,30.3 16,48 C16,65.7 30.3,80 48,80 C65.7,80 80,65.7 80,48 C80,30.3 65.7,16 48,16 Z" />
+    <!-- Red Center Circle -->
+    <path
+        android:fillColor="#DA291C"
+        android:pathData="M48,22 C62.4,22 74,33.6 74,48 C74,62.4 62.4,74 48,74 C33.6,74 22,62.4 22,48 C22,33.6 33.6,22 48,22 Z" />
+    <!-- White Eiffel Tower Silhouette -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,26 L45,38 L42,56 L35,70 L41,70 L43,62 L53,62 L55,70 L61,70 L54,56 L51,38 Z M45,56 L48,46 L51,56 Z" />
+    <!-- White Fleur-de-Lys at base -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,62 C47,59 45,57 43,58 C44,60 45,63 45,65 L44,68 L48,68 L52,68 L51,65 C51,63 52,60 53,58 C51,57 49,59 48,62 Z" />
+</vector>

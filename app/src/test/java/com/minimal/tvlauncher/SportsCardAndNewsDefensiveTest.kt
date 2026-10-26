@@ -63,15 +63,14 @@ class SportsCardAndNewsDefensiveTest {
         assertThat(widgetNewsContainer.visibility).isEqualTo(View.VISIBLE)
         assertThat(widgetSportsContainer.visibility).isEqualTo(View.VISIBLE)
 
-        // Spatial layout check: Sports is top-right, News is bottom-center
-        val sportsLp = widgetSportsContainer.layoutParams as FrameLayout.LayoutParams
-        val newsLp = widgetNewsContainer.layoutParams as FrameLayout.LayoutParams
+        // Spatial layout check: News is square and positioned directly above Sports in top-right column
+        val column = activity.findViewById<android.widget.LinearLayout>(R.id.dashboard_widgets_column)
+        assertThat(column).isNotNull()
+        val columnLp = column.layoutParams as FrameLayout.LayoutParams
+        assertThat(columnLp.gravity and android.view.Gravity.TOP).isNotEqualTo(0)
+        assertThat(columnLp.gravity and android.view.Gravity.END).isNotEqualTo(0)
 
-        assertThat(sportsLp.gravity and android.view.Gravity.TOP).isNotEqualTo(0)
-        assertThat(sportsLp.gravity and android.view.Gravity.END).isNotEqualTo(0)
-
-        assertThat(newsLp.gravity and android.view.Gravity.BOTTOM).isNotEqualTo(0)
-        assertThat(newsLp.gravity and android.view.Gravity.CENTER_HORIZONTAL).isNotEqualTo(0)
+        assertThat(column.indexOfChild(widgetNewsContainer)).isLessThan(column.indexOfChild(widgetSportsContainer))
     }
 
     @Test

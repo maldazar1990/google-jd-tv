@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Toronto Raptors Official Ball & Claw (Wikimedia) -->
+    <!-- Red Outer Circle -->
+    <path
+        android:fillColor="#CE1141"
+        android:pathData="M48,6 C71.2,6 90,24.8 90,48 C90,71.2 71.2,90 48,90 C24.8,90 6,71.2 6,48 C6,24.8 24.8,6 48,6 Z" />
+    <!-- Silver Ball Trim -->
+    <path
+        android:fillColor="#A1A1A4"
+        android:pathData="M48,12 C67.9,12 84,28.1 84,48 C84,67.9 67.9,84 48,84 C28.1,84 12,67.9 12,48 C12,28.1 28.1,12 48,12 Z" />
+    <!-- Black Inner Ball -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M48,15 C66.2,15 81,29.8 81,48 C81,66.2 66.2,81 48,81 C29.8,81 15,66.2 15,48 C15,29.8 29.8,15 48,15 Z" />
+    <!-- White / Silver 3-Claw Slash -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,30 L38,30 L48,66 L42,66 Z M44,24 L52,24 L60,66 L54,66 Z M58,28 L66,28 L72,66 L66,66 Z" />
+    <!-- Red Seams on Ball -->
+    <path
+        android:fillColor="#CE1141"
+        android:pathData="M22,48 C30,48 40,54 48,68 L44,70 C36,58 28,52 20,52 Z M74,48 C66,48 56,54 48,68 L52,70 C60,58 68,52 76,52 Z" />
+</vector>

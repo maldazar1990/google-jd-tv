@@ -89,7 +89,10 @@ class MainActivityUiNavigationTest {
         assertThat(btnCcPower.isFocused).isTrue()
 
         // Check D-Pad chained navigation
-        assertThat(btnCcPower.nextFocusDownId).isEqualTo(R.id.btn_cc_all_settings)
+        val btnCcCecPower = activity.findViewById<View>(R.id.btn_cc_cec_power)
+        assertThat(btnCcCecPower).isNotNull()
+        assertThat(btnCcPower.nextFocusDownId).isEqualTo(R.id.btn_cc_cec_power)
+        assertThat(btnCcCecPower.nextFocusDownId).isEqualTo(R.id.btn_cc_all_settings)
         assertThat(btnCcPower.nextFocusRightId).isEqualTo(R.id.btn_cc_wifi)
         assertThat(btnCcWifi.nextFocusDownId).isEqualTo(R.id.btn_cc_remote_battery)
         assertThat(btnCcWifi.nextFocusLeftId).isEqualTo(R.id.btn_cc_power)

@@ -77,14 +77,32 @@ class SportsManager {
             clean.contains("canadien") || clean.contains("habs") || clean == "mtl" || clean.contains("montreal") || clean.contains("montréal") -> {
                 R.drawable.ic_team_canadiens
             }
-            clean.contains("leaf") || clean == "tor" || clean.contains("toronto") -> {
+            clean.contains("bruin") -> {
+                R.drawable.ic_team_bruins
+            }
+            clean.contains("celtic") || clean == "bos" || clean == "boston" -> {
+                R.drawable.ic_team_celtics
+            }
+            clean.contains("raptor") -> {
+                R.drawable.ic_team_raptors
+            }
+            clean.contains("leaf") || clean == "tor" || clean == "toronto" -> {
                 R.drawable.ic_team_leafs
             }
             clean.contains("laker") || clean == "lal" -> {
                 R.drawable.ic_team_lakers
             }
-            clean.contains("celtic") || clean == "bos" || clean.contains("boston") -> {
-                R.drawable.ic_team_celtics
+            clean.contains("warrior") || clean == "gsw" || clean.contains("golden state") -> {
+                R.drawable.ic_team_warriors
+            }
+            clean.contains("oiler") || clean == "edm" || clean.contains("edmonton") -> {
+                R.drawable.ic_team_oilers
+            }
+            clean.contains("ranger") || clean == "nyr" -> {
+                R.drawable.ic_team_rangers
+            }
+            clean.contains("psg") || clean.contains("paris") -> {
+                R.drawable.ic_team_psg
             }
             clean.contains("real") || clean == "rma" || clean.contains("madrid") -> {
                 R.drawable.ic_team_real_madrid
