@@ -12,6 +12,7 @@ allprojects {
     } catch (_: Exception) {
         "default"
     }
-    val tempBuild = file("C:/Users/jdgen/AppData/Local/Temp/tv_build_${branch}/${project.name}")
+    val tempDir = System.getProperty("java.io.tmpdir")
+    val tempBuild = file("${tempDir}/tv_build_${branch}/${project.name}")
     layout.buildDirectory.set(tempBuild)
 }
